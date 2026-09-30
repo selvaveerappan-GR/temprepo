@@ -12,61 +12,95 @@
     GENERIC_READ | GENERIC_EXECUTE on each task. The user can start them; only SYSTEM
     can change what they do.
 
-        Button                        Task started                    Runs as
+        Button                        Privileged work                 Runs as
         ----------------------------  ------------------------------  -------
-        Check compliance              GR-RunIntunePushLaunch, then    SYSTEM
-                                      GR-RunIntuneComplianceCheck
+        Check compliance              GR-RunIntuneComplianceCheck     SYSTEM
+                                      (devicecontroller.exe)
         Install updates               GR-InstallIntuneUpdates         SYSTEM
         Install updates and restart   GR-InstallIntuneUpdates         SYSTEM
-                                      then shutdown.exe /r           user
+                                      then shutdown.exe /r            user
 
     The pending-updates list is read in-process through the Windows Update Agent COM API,
     which a standard user may query read-only. Installing is what needs SYSTEM.
 
-    CONTRACT WITH THE TASK SCRIPTS (they are placeholders right now - see Notes):
+    COMPLIANCE SEQUENCE (Check compliance button)
 
-      GR-RunIntuneComplianceCheck.ps1 must write $ComplianceStatusFile as JSON:
-          { "state": "Compliant" | "NonCompliant" | "Unknown",
-            "checkedAt": "<ISO 8601 UTC>",
-            "reasons": [ "<optional human-readable reason>", ... ] }
-      and must grant Users read on that file. This GUI treats the file as the single
-      source of truth for compliance and ignores results older than the run it just
-      triggered, so a stale file cannot show a false green.
+    The verdict is read out of the per-user Company Portal cache, which only gets
+    populated while Company Portal is running. So the check is a sequence, not a single
+    call, and each step must happen in this order:
+
+      1. If the user's cache directory holds no *.tmp files, prime it: launch
+         Company Portal minimised via 'companyportal:', wait -CachePrimeWaitSeconds,
+         then kill CompanyPortal.exe. Skipped when the cache is already populated.
+      2. Start GR-RunIntuneComplianceCheck, which runs devicecontroller.exe elevated.
+         Wait for the task to leave the Running state.
+      3. Wait -PostTaskWaitSeconds so the refreshed state lands in the cache.
+      4. Relaunch Company Portal minimised and leave it running.
+      5. Read the verdict out of the newest cache file (see Get-ComplianceVerdictFromCache).
 
       GR-InstallIntuneUpdates.ps1 must install pending updates and MUST NOT reboot.
       Reboot is owned by this GUI so that "install only" is genuinely reboot-free and
       the user always gets the countdown and a chance to cancel.
 
-      GR-RunIntunePushLaunch.ps1 is assumed to force an Intune/MDM policy sync, so
-      compliance is evaluated against current policy rather than a cached verdict.
-      If that is not its purpose, set -SkipPushLaunch or drop the task name.
-
 .NOTES
-    Compliance is NOT determined locally by this script. Intune evaluates compliance
-    server-side, and there is no supported local API that returns the tenant's verdict,
-    so the GUI reports whatever GR-RunIntuneComplianceCheck.ps1 writes to the status
-    file. Until that script is implemented the indicator will show Unknown (grey), not
-    a fabricated green or red. The MDM enrollment state shown underneath the indicator
-    IS read locally, from HKLM\SOFTWARE\Microsoft\Enrollments, purely as context.
+    The compliance parse comes from intunecompcheck.ps1: cache files are JSON whose
+    'data' member is itself a JSON string, and that inner payload carries
+    ComplianceState ("Compliant", "NotCompliant", "Error").
 
-.PARAMETER ComplianceStatusFile
-    JSON file written by GR-RunIntuneComplianceCheck.ps1 and read by this GUI.
+    One deliberate difference from that script. It collapses every outcome to a single
+    boolean, so "not compliant", "cache file missing" and "parse failed" all become
+    $IsCompliant = $false. Here, only a literal ComplianceState of Compliant goes green
+    - same as the original - but the cases where nothing could be read report Unknown
+    (grey) rather than red, because telling a user their device is non-compliant when
+    the truth is that the cache was unreadable is a different and worse claim. Intune's
+    'Error' state is likewise reported verbatim rather than shown as red.
 
-.PARAMETER SkipPushLaunch
-    Do not run GR-RunIntunePushLaunch before the compliance check.
+    GR-RunIntunePushLaunch is no longer used by this GUI: launching Company Portal is
+    done directly here, in the user's own session, because the cache it populates is
+    per-user and a SYSTEM task cannot populate it.
+
+    Minimising Company Portal is best-effort. It is a UWP app, so ShellExecute's
+    minimise request is generally ignored and its top-level window belongs to
+    ApplicationFrameHost.exe; the window is minimised via ShowWindowAsync once it
+    appears. Expect it to be briefly visible. That is cosmetic - priming the cache is
+    the functional part.
+
+    The MDM enrollment state shown under the indicator is read locally from
+    HKLM\SOFTWARE\Microsoft\Enrollments, purely as context. It is not a verdict.
+
+.PARAMETER ComplianceCacheDirectory
+    The current user's Company Portal application cache. Defaults to the UWP package
+    path from intunecompcheck.ps1:
+    %LOCALAPPDATA%\Packages\Microsoft.CompanyPortal_8wekyb3d8bbwe\TempState\ApplicationCache
+    Supports environment variables.
+
+.PARAMETER CachePrimeWaitSeconds
+    How long Company Portal stays open to populate an empty cache before being killed.
+
+.PARAMETER PostTaskWaitSeconds
+    Settle time after GR-RunIntuneComplianceCheck finishes, before Company Portal is
+    relaunched and the cache is read.
 
 .EXAMPLE
     powershell.exe -STA -NoProfile -ExecutionPolicy Bypass -File .\GR-IntuneSelfServiceGui.ps1
+
+.EXAMPLE
+    # Shorter waits for testing the sequence.
+    .\GR-IntuneSelfServiceGui.ps1 -CachePrimeWaitSeconds 5 -PostTaskWaitSeconds 5
 #>
 [CmdletBinding()]
 param(
-    [ValidateNotNullOrEmpty()]
-    [string]$ComplianceStatusFile = 'C:\ProgramData\GR\IntuneSelfService\compliance.json',
+    # Per-user UWP package cache for Company Portal, from intunecompcheck.ps1.
+    [string]$ComplianceCacheDirectory = (Join-Path $env:LOCALAPPDATA 'Packages\Microsoft.CompanyPortal_8wekyb3d8bbwe\TempState\ApplicationCache'),
 
     [ValidateNotNullOrEmpty()]
     [string]$TaskPath = '\',
 
-    [switch]$SkipPushLaunch
+    [ValidateRange(1, 300)]
+    [int]$CachePrimeWaitSeconds = 10,
+
+    [ValidateRange(1, 300)]
+    [int]$PostTaskWaitSeconds = 10
 )
 
 Set-StrictMode -Version Latest
@@ -81,9 +115,9 @@ if ([System.Threading.Thread]::CurrentThread.GetApartmentState() -ne 'STA') {
 Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase, System.Xaml
 
 $TASK_COMPLIANCE = 'GR-RunIntuneComplianceCheck'
-$TASK_PUSH_LAUNCH = 'GR-RunIntunePushLaunch'
 $TASK_INSTALL_UPDATES = 'GR-InstallIntuneUpdates'
 $TASK_TIMEOUT_SECONDS = 900          # 15 min ceiling for an update install
+$COMPLIANCE_TIMEOUT_SECONDS = 300    # devicecontroller.exe should be far quicker than this
 $RESTART_DELAY_SECONDS = 60          # user can abort with: shutdown /a
 
 # UI state. Declared up front because Set-Busy/Update-ActionState read them and
@@ -439,6 +473,9 @@ function Start-AsyncWork {
             Handle    = $shell.BeginInvoke()
             OnSuccess = $OnSuccess
             OnFailure = $OnFailure
+            # How many Information records have already been shown, so the poll tick only
+            # surfaces new ones. A multi-step sequence reports progress through this stream.
+            Reported  = 0
         })
 }
 
@@ -447,6 +484,14 @@ $pollTimer.Interval = [TimeSpan]::FromMilliseconds(250)
 $pollTimer.Add_Tick({
         for ($i = $script:Jobs.Count - 1; $i -ge 0; $i--) {
             $job = $script:Jobs[$i]
+
+            # Drain any new progress lines the worker wrote, whether or not it has finished.
+            $info = $job.Shell.Streams.Information
+            if ($info.Count -gt $job.Reported) {
+                $ui['TxtStatus'].Text = [string]$info[$info.Count - 1].MessageData
+                $job.Reported = $info.Count
+            }
+
             if (-not $job.Handle.IsCompleted) { continue }
 
             $script:Jobs.RemoveAt($i)
@@ -539,64 +584,231 @@ $runTaskWork = {
     [PSCustomObject]@{ Completed = $true }
 }
 
-$readComplianceWork = {
+$checkComplianceWork = {
+    <#
+        The full compliance sequence. Runs in the user's own session, which matters: the
+        Company Portal cache is per-user, so a SYSTEM task cannot populate it. Only the
+        devicecontroller.exe step needs elevation, and that is what the scheduled task is for.
+
+        Progress is reported through Write-Information, which the UI thread drains from
+        $shell.Streams.Information and shows in the status bar.
+    #>
     param(
-        [string[]]$TaskName,
+        [string]$CacheDirectory,
+        [string]$TaskName,
         [string]$TaskPath,
-        [string]$StatusFile,
-        [int]$TimeoutSeconds,
-        [datetime]$NotBeforeUtc
+        [int]$CachePrimeWaitSeconds,
+        [int]$PostTaskWaitSeconds,
+        [int]$TaskTimeoutSeconds
     )
 
-    foreach ($name in $TaskName) {
-        $task = Get-ScheduledTask -TaskName $name -TaskPath $TaskPath -ErrorAction SilentlyContinue
-        if (-not $task) {
-            throw "Scheduled task '$name' is not registered on this machine. An administrator must run New-GRIntuneScheduledTasks.ps1."
-        }
-        Start-ScheduledTask -TaskName $name -TaskPath $TaskPath
+    $InformationPreference = 'Continue'
+    $ErrorActionPreference = 'Stop'
 
-        $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
-        do {
-            Start-Sleep -Seconds 2
-            $state = (Get-ScheduledTask -TaskName $name -TaskPath $TaskPath).State
-        } while ($state -eq 'Running' -and (Get-Date) -lt $deadline)
+    # Company Portal is a UWP app: ShellExecute's minimise request is generally ignored and
+    # the top-level window belongs to ApplicationFrameHost.exe, so minimise it explicitly
+    # once it appears. Guarded because each job is a new runspace in the same AppDomain and
+    # re-adding an existing type throws.
+    if (-not ('GRNativeWindow' -as [type])) {
+        Add-Type -Namespace '' -Name 'GRNativeWindow' -MemberDefinition @'
+            [DllImport("user32.dll")]
+            public static extern bool ShowWindowAsync(System.IntPtr hWnd, int nCmdShow);
+'@
+    }
+    $SW_MINIMIZE = 6
+
+    function Get-CompanyPortalWindow {
+        # The CompanyPortal process often reports MainWindowHandle 0 because its frame is
+        # owned by ApplicationFrameHost, so check both.
+        $candidates = @(Get-Process -Name 'CompanyPortal' -ErrorAction SilentlyContinue) +
+        @(Get-Process -Name 'ApplicationFrameHost' -ErrorAction SilentlyContinue |
+                Where-Object { $_.MainWindowTitle -like '*Company Portal*' })
+        $candidates | Where-Object { $_.MainWindowHandle -ne [System.IntPtr]::Zero } |
+            Select-Object -First 1
     }
 
-    if (-not (Test-Path -LiteralPath $StatusFile)) {
-        return [PSCustomObject]@{
+    function Start-CompanyPortalMinimised {
+        Write-Information 'Opening Company Portal...'
+        Start-Process 'companyportal:' -WindowStyle Minimized
+
+        # Best effort: give the window up to ~10s to appear, then minimise it. A visible
+        # window is cosmetic; populating the cache is the functional part, so a failure
+        # to minimise must not fail the check.
+        for ($i = 0; $i -lt 20; $i++) {
+            Start-Sleep -Milliseconds 500
+            $proc = Get-CompanyPortalWindow
+            if ($proc) {
+                [void][GRNativeWindow]::ShowWindowAsync($proc.MainWindowHandle, $SW_MINIMIZE)
+                return
+            }
+        }
+        Write-Information 'Company Portal window did not appear in time to be minimised; continuing.'
+    }
+
+    function Stop-CompanyPortal {
+        Write-Information 'Closing Company Portal...'
+        Get-Process -Name 'CompanyPortal' -ErrorAction SilentlyContinue |
+            Stop-Process -Force -ErrorAction SilentlyContinue
+    }
+
+    # The emptiness probe and the parser must look at the same file set, or the sequence can
+    # skip priming on files it then turns out to be unable to read.
+    $cacheInclude = @('*.tmp*', '*.json')
+
+    function Get-CacheFile {
+        param([string]$Path)
+        Get-ChildItem -Path $Path -Include $cacheInclude -File -Recurse -ErrorAction SilentlyContinue |
+            Sort-Object LastWriteTime -Descending
+    }
+
+    function Test-CacheIsEmpty {
+        param([string]$Path)
+        if (-not $Path) { return $true }
+        if (-not (Test-Path -LiteralPath $Path)) { return $true }
+        return (@(Get-CacheFile -Path $Path).Count -eq 0)
+    }
+
+    function Get-ComplianceVerdictFromCache {
+        <#
+            Parses the Company Portal application cache, per intunecompcheck.ps1: the cache
+            file holds JSON whose 'data' member is itself a JSON string, and that inner
+            payload carries ComplianceState.
+
+            Deviation from intunecompcheck.ps1, which collapses everything to a single
+            boolean: that script sets $IsCompliant = $false for "not compliant", "cache
+            file missing" and "parse failed" alike. This GUI has a three-state indicator,
+            and showing red for "we could not read the cache" would tell the user their
+            device is non-compliant when the truth is that we do not know. Only a literal
+            ComplianceState of Compliant goes green - matching the original - but the
+            unreadable cases report Unknown/grey instead of red.
+        #>
+        param([string]$Path)
+
+        if (-not (Test-Path -LiteralPath $Path)) {
+            return [PSCustomObject]@{
+                State  = 'Unknown'
+                Reason = "Company Portal cache directory not found at '$Path'. Ensure the user has signed in to the Company Portal app at least once."
+            }
+        }
+
+        $files = @(Get-CacheFile -Path $Path)
+        if ($files.Count -eq 0) {
+            return [PSCustomObject]@{
+                State  = 'Unknown'
+                Reason = 'Company Portal cache file not found. Ensure the user has signed in to the Company Portal app at least once.'
+            }
+        }
+
+        # Newest first, as in intunecompcheck.ps1, but keep going until one actually yields a
+        # ComplianceState: the most recently written file is not always the one holding sync
+        # telemetry, and stopping at the first file makes the check flaky. Bounded so a large
+        # cache cannot stall the UI.
+        $examined = 0
+        foreach ($file in $files) {
+            if ($examined -ge 25) { break }
+            $examined++
+
+            try {
+                $raw = Get-Content -LiteralPath $file.FullName -Raw -ErrorAction Stop | ConvertFrom-Json
+            }
+            catch { continue }
+
+            if (-not $raw -or $raw.PSObject.Properties.Name -notcontains 'data' -or -not $raw.data) { continue }
+
+            try {
+                $payload = $raw.data | ConvertFrom-Json
+            }
+            catch { continue }
+
+            $state = [string]$payload.ComplianceState
+            if (-not $state) { continue }
+
+            $stamp = $file.LastWriteTime.ToString('HH:mm:ss')
+            switch -Regex ($state) {
+                '^Compliant$' {
+                    return [PSCustomObject]@{
+                        State  = 'Compliant'
+                        Reason = "Company Portal reported ComplianceState = Compliant (cache written $stamp)."
+                    }
+                }
+                '^(Not|Non)Compliant$' {
+                    return [PSCustomObject]@{
+                        State  = 'NonCompliant'
+                        Reason = "Company Portal reported ComplianceState = $state (cache written $stamp)."
+                    }
+                }
+                default {
+                    # Intune's 'Error' state lands here: not a confirmed failure, so it is
+                    # reported as-is rather than shown as non-compliant. Move this into the
+                    # NonCompliant branch if you would rather treat Error as red.
+                    return [PSCustomObject]@{
+                        State  = 'Unknown'
+                        Reason = "Company Portal reported ComplianceState = '$state', which is neither Compliant nor NotCompliant, so no verdict was assumed (cache written $stamp)."
+                    }
+                }
+            }
+        }
+
+        [PSCustomObject]@{
             State  = 'Unknown'
-            AsOf   = $null
-            Reason = "No compliance result at '$StatusFile'. GR-RunIntuneComplianceCheck.ps1 is still a placeholder and has not written one."
+            Reason = "Read $examined cache file(s) but none contained a readable data.ComplianceState value."
         }
     }
 
-    $status = Get-Content -LiteralPath $StatusFile -Raw | ConvertFrom-Json
+    # --- Preconditions -----------------------------------------------------------------
+    if (-not $CacheDirectory) {
+        throw 'No Company Portal cache directory configured. Pass -ComplianceCacheDirectory with the path defined in intunecompcheck.ps1.'
+    }
+    $CacheDirectory = [System.Environment]::ExpandEnvironmentVariables($CacheDirectory)
 
-    $checkedAt = $null
-    if ($status.PSObject.Properties.Name -contains 'checkedAt' -and $status.checkedAt) {
-        $checkedAt = ([datetime]$status.checkedAt).ToUniversalTime()
+    $task = Get-ScheduledTask -TaskName $TaskName -TaskPath $TaskPath -ErrorAction SilentlyContinue
+    if (-not $task) {
+        throw "Scheduled task '$TaskName' is not registered on this machine. An administrator must run New-GRIntuneScheduledTasks.ps1."
     }
 
-    # Refuse to present a verdict written before this run - otherwise a stale file could
-    # show green for a device that is no longer compliant.
-    if ($null -eq $checkedAt -or $checkedAt -lt $NotBeforeUtc) {
-        return [PSCustomObject]@{
-            State  = 'Unknown'
-            AsOf   = $checkedAt
-            Reason = 'The compliance result on disk predates this check, so it was not trusted. The task ran but did not publish a fresh result.'
-        }
+    # --- 1. Prime the cache, but only if it is empty ------------------------------------
+    if (Test-CacheIsEmpty -Path $CacheDirectory) {
+        Write-Information 'Cache is empty - priming it with Company Portal...'
+        Start-CompanyPortalMinimised
+        Write-Information "Letting Company Portal populate the cache ($CachePrimeWaitSeconds s)..."
+        Start-Sleep -Seconds $CachePrimeWaitSeconds
+        Stop-CompanyPortal
+    }
+    else {
+        Write-Information 'Cache already populated - skipping the priming step.'
     }
 
-    $reasons = @()
-    if ($status.PSObject.Properties.Name -contains 'reasons' -and $status.reasons) {
-        $reasons = @($status.reasons)
+    # --- 2. Elevated compliance evaluation ----------------------------------------------
+    # Started, not created: the task already exists and runs as SYSTEM. A standard user can
+    # only get here because its DACL grants BUILTIN\Users GENERIC_EXECUTE.
+    Write-Information 'Running the compliance check as SYSTEM (devicecontroller.exe)...'
+    Start-ScheduledTask -TaskName $TaskName -TaskPath $TaskPath
+
+    $deadline = (Get-Date).AddSeconds($TaskTimeoutSeconds)
+    do {
+        Start-Sleep -Seconds 2
+        $state = (Get-ScheduledTask -TaskName $TaskName -TaskPath $TaskPath).State
+    } while ($state -eq 'Running' -and (Get-Date) -lt $deadline)
+
+    if ($state -eq 'Running') {
+        throw "Task '$TaskName' was still running after $TaskTimeoutSeconds seconds; giving up on waiting for it."
     }
 
-    [PSCustomObject]@{
-        State  = [string]$status.state
-        AsOf   = $checkedAt
-        Reason = ($reasons -join ' ')
+    $lastResult = (Get-ScheduledTaskInfo -TaskName $TaskName -TaskPath $TaskPath).LastTaskResult
+    if ($lastResult -ne 0) {
+        throw ("Task '$TaskName' finished with exit code 0x{0:X8}." -f $lastResult)
     }
+
+    # --- 3. Let the refreshed state land ------------------------------------------------
+    Write-Information "Waiting $PostTaskWaitSeconds s for the refreshed state to reach the cache..."
+    Start-Sleep -Seconds $PostTaskWaitSeconds
+
+    # --- 4. Reopen Company Portal and leave it running ----------------------------------
+    Start-CompanyPortalMinimised
+
+    # --- 5. Read the verdict ------------------------------------------------------------
+    Write-Information 'Reading compliance state from the cache...'
+    Get-ComplianceVerdictFromCache -Path $CacheDirectory
 }
 
 $readEnrollmentWork = {
@@ -736,28 +948,25 @@ $ui['BtnRescan'].Add_Click({ Start-UpdateScan })
 
 # 1. Compliance
 $ui['BtnCheckCompliance'].Add_Click({
-        Set-Busy -Busy $true -Message 'Requesting a compliance evaluation...'
-        Set-ComplianceIndicator -State 'Checking' -Detail 'Syncing policy and evaluating compliance. This can take a minute.'
+        Set-Busy -Busy $true -Message 'Starting compliance check...'
+        Set-ComplianceIndicator -State 'Checking' -Detail 'Priming the Company Portal cache, evaluating, then re-reading. This takes about a minute.'
 
-        $tasks = if ($SkipPushLaunch) { @($TASK_COMPLIANCE) } else { @($TASK_PUSH_LAUNCH, $TASK_COMPLIANCE) }
-
-        Start-AsyncWork -Work $readComplianceWork -Arguments @{
-            TaskName       = $tasks
-            TaskPath       = $TaskPath
-            StatusFile     = $ComplianceStatusFile
-            TimeoutSeconds = $TASK_TIMEOUT_SECONDS
-            # Anything published before this instant is a stale verdict, not our result.
-            NotBeforeUtc   = (Get-Date).ToUniversalTime()
+        Start-AsyncWork -Work $checkComplianceWork -Arguments @{
+            CacheDirectory        = $ComplianceCacheDirectory
+            TaskName              = $TASK_COMPLIANCE
+            TaskPath              = $TaskPath
+            CachePrimeWaitSeconds = $CachePrimeWaitSeconds
+            PostTaskWaitSeconds   = $PostTaskWaitSeconds
+            TaskTimeoutSeconds    = $COMPLIANCE_TIMEOUT_SECONDS
         } -OnSuccess {
             param($result)
-            $state = switch ($result.State) {
+            $verdict = @($result)[-1]
+            $state = switch ($verdict.State) {
                 'Compliant' { 'Compliant' }
                 'NonCompliant' { 'NonCompliant' }
                 default { 'Unknown' }
             }
-            $detail = if ($result.Reason) { $result.Reason }
-            elseif ($result.AsOf) { "Checked $($result.AsOf.ToLocalTime().ToString('HH:mm:ss')) against current Intune policy." }
-            else { 'No detail reported.' }
+            $detail = if ($verdict.Reason) { $verdict.Reason } else { 'No detail reported.' }
 
             Set-ComplianceIndicator -State $state -Detail $detail
             Set-Busy -Busy $false -Message "Compliance: $state."
@@ -822,7 +1031,15 @@ $ui['BtnInstallRestart'].Add_Click({
 $window.Add_Loaded({
         $ui['TxtDeviceName'].Text = $env:COMPUTERNAME
         $ui['TxtUser'].Text = "$env:USERDOMAIN\$env:USERNAME"
-        Set-ComplianceIndicator -State 'Unknown' -Detail 'Not checked yet.'
+
+        # Say up front that compliance cannot be read, rather than only on click.
+        if ($ComplianceCacheDirectory) {
+            Set-ComplianceIndicator -State 'Unknown' -Detail 'Not checked yet.'
+        }
+        else {
+            Set-ComplianceIndicator -State 'Unknown' `
+                -Detail 'No cache directory configured. Pass -ComplianceCacheDirectory with the path from intunecompcheck.ps1.'
+        }
 
         Start-AsyncWork -Work $readEnrollmentWork -OnSuccess {
             param($result)
