@@ -109,10 +109,19 @@ function Get-MdmEnrollmentId {
     [CmdletBinding()]
     param()
 
+    # The property must be tested for existence before it is read. Not every subkey under
+    # Enrollments carries EnrollmentType - some hold only Context/Status style values, and a
+    # key with no values at all makes Get-ItemProperty return $null. Under
+    # Set-StrictMode -Version Latest, reading a missing property on either is a terminating
+    # error ("The property 'EnrollmentType' cannot be found on this object"), so the plain
+    # (Get-ItemProperty ...).EnrollmentType form fails on the first such key.
     $ids = @(
         Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\Enrollments' -ErrorAction SilentlyContinue |
             Where-Object {
-                (Get-ItemProperty $_.PSPath -ErrorAction SilentlyContinue).EnrollmentType -eq $MDM_DEVICE_ENROLLMENT_TYPE
+                $props = Get-ItemProperty -LiteralPath $_.PSPath -ErrorAction SilentlyContinue
+                $props -and
+                ($props.PSObject.Properties.Name -contains 'EnrollmentType') -and
+                ($props.EnrollmentType -eq $MDM_DEVICE_ENROLLMENT_TYPE)
             } | Select-Object -ExpandProperty PSChildName
     )
 
