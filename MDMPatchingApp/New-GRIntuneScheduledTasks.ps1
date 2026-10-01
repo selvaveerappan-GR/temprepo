@@ -20,7 +20,16 @@
                                    compliance. <EnrollmentID> is resolved at registration
                                    time from the device's MDM enrollment and baked into the
                                    argument, so it is fixed until this script is re-run.
+      GR-RunIntuneRestartIME       powershell.exe -Command Restart-Service
+                                   IntuneManagementExtension, which forces the Intune
+                                   Management Extension to check in. Exits 0 or 1 so
+                                   LastTaskResult reflects whether the restart worked.
       everything else              powershell.exe -File <ScriptDirectory>\<TaskName>.ps1
+
+    Re-running also unregisters tasks this script used to create but no longer does
+    (currently GR-RunIntunePushLaunch), in both -TaskPath and the root folder, so the
+    \GRIntune\ folder ends up matching the current design rather than accumulating dead
+    tasks that standard users can still execute. Use -WhatIf to see what would be removed.
 
     Register-ScheduledTask creates a task whose default security descriptor lets
     non-administrators read the task but not start it, and the ScheduledTasks module exposes
@@ -75,7 +84,7 @@ param(
     [ValidateNotNullOrEmpty()]
     [string[]]$TaskName = @(
         'GR-RunIntuneComplianceCheck',
-        'GR-RunIntunePushLaunch',
+        'GR-RunIntuneRestartIME',
         'GR-InstallIntuneUpdates'
     ),
 
@@ -98,7 +107,14 @@ $TASK_GENERIC_READ_EXECUTE = [int](0x80000000 -bor 0x20000000)
 $DACL_SECURITY_INFORMATION = 0x4
 $USERS_SID = 'S-1-5-32-545'   # BUILTIN\Users - well-known, locale-independent
 $TASK_COMPLIANCE = 'GR-RunIntuneComplianceCheck'
+$TASK_RESTART_IME = 'GR-RunIntuneRestartIME'
 $MDM_DEVICE_ENROLLMENT_TYPE = 6   # device (not user) MDM enrollment
+$IME_SERVICE_NAME = 'IntuneManagementExtension'
+
+# Tasks this script used to create. Re-running removes them, so the \GRIntune\ folder ends
+# up matching the current design instead of accumulating dead tasks that standard users can
+# still execute.
+$OBSOLETE_TASK_NAMES = @('GR-RunIntunePushLaunch')
 
 function Get-MdmEnrollmentId {
     <#
@@ -139,7 +155,7 @@ function Get-MdmEnrollmentId {
 
 function New-GRTaskAction {
     <#
-        The compliance task drives a system binary directly; everything else runs a .ps1.
+        Two tasks drive something directly rather than running a script; the rest run a .ps1.
     #>
     [CmdletBinding()]
     param(
@@ -148,10 +164,21 @@ function New-GRTaskAction {
         [string]$EnrollmentId
     )
 
+    $powershell = "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe"
+
     if ($TaskName -eq $TASK_COMPLIANCE) {
         # An on-demand MDM sync, which is what makes Intune re-evaluate compliance.
         return New-ScheduledTaskAction -Execute "$env:SystemRoot\System32\deviceenroller.exe" `
             -Argument "/o $EnrollmentId /c /b"
+    }
+
+    if ($TaskName -eq $TASK_RESTART_IME) {
+        # Restarting the Intune Management Extension forces it to check in with Intune.
+        # Wrapped in try/catch with explicit exit codes so LastTaskResult distinguishes a
+        # failed restart from a successful one - the GUI keys its outcome off that.
+        $command = "try { Restart-Service -Name '$IME_SERVICE_NAME' -Force -ErrorAction Stop; exit 0 } catch { exit 1 }"
+        return New-ScheduledTaskAction -Execute $powershell `
+            -Argument "-NoProfile -NonInteractive -ExecutionPolicy Bypass -Command `"$command`""
     }
 
     # [IO.Path]::Combine rather than Join-Path: Join-Path resolves the drive qualifier and
@@ -161,7 +188,7 @@ function New-GRTaskAction {
         Write-Warning "[$TaskName] action target '$scriptPath' does not exist yet. The task will register but fail until the script is in place."
     }
 
-    New-ScheduledTaskAction -Execute "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe" `
+    New-ScheduledTaskAction -Execute $powershell `
         -Argument "-NoProfile -NonInteractive -ExecutionPolicy Bypass -File `"$scriptPath`""
 }
 
@@ -245,11 +272,16 @@ try {
             $action = New-GRTaskAction -TaskName $name -ScriptDirectory $ScriptDirectory -EnrollmentId $EnrollmentId
 
             Write-Verbose "[$name] registering '$TaskPath$name'"
-            $description = if ($name -eq $TASK_COMPLIANCE) {
-                "Triggers an on-demand Intune MDM sync (deviceenroller.exe) as SYSTEM so compliance is re-evaluated. Startable on demand by members of BUILTIN\Users."
-            }
-            else {
-                "Runs $name as SYSTEM. Startable on demand by members of BUILTIN\Users."
+            $description = switch ($name) {
+                $TASK_COMPLIANCE {
+                    "Triggers an on-demand Intune MDM sync (deviceenroller.exe) as SYSTEM so compliance is re-evaluated. Startable on demand by members of BUILTIN\Users."
+                }
+                $TASK_RESTART_IME {
+                    "Restarts the $IME_SERVICE_NAME service as SYSTEM, forcing the Intune Management Extension to check in. Startable on demand by members of BUILTIN\Users."
+                }
+                default {
+                    "Runs $name as SYSTEM. Startable on demand by members of BUILTIN\Users."
+                }
             }
 
             $null = Register-ScheduledTask -TaskName $name -TaskPath $TaskPath `
@@ -264,6 +296,24 @@ try {
             # Keep going so one bad task does not leave the rest unregistered.
             $failures.Add([PSCustomObject]@{ TaskName = $name; Reason = $_.Exception.Message })
             Write-Error -ErrorRecord $_ -ErrorAction Continue
+        }
+    }
+
+    # Clear out tasks this script used to create. Checked in the root folder too, since
+    # earlier revisions registered into '\' before \GRIntune\ existed.
+    foreach ($obsolete in $OBSOLETE_TASK_NAMES) {
+        foreach ($path in @($TaskPath, '\') | Select-Object -Unique) {
+            $stale = Get-ScheduledTask -TaskName $obsolete -TaskPath $path -ErrorAction SilentlyContinue
+            if (-not $stale) { continue }
+            if ($PSCmdlet.ShouldProcess("$path$obsolete", 'Unregister obsolete task')) {
+                try {
+                    Unregister-ScheduledTask -TaskName $obsolete -TaskPath $path -Confirm:$false
+                    Write-Verbose "Removed obsolete task '$path$obsolete'"
+                }
+                catch {
+                    Write-Warning "Could not remove obsolete task '$path$obsolete': $($_.Exception.Message)"
+                }
+            }
         }
     }
 }
