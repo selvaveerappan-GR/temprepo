@@ -50,7 +50,29 @@
     and whether a reboot is needed - rather than inferring it from an exit code. A result
     stamped before the run just triggered is rejected, so a previous outcome cannot be
     shown as this one's. "Install updates and restart" skips the restart when nothing was
-    installed, since a reboot would then be disruption for no benefit.
+    installed, since a reboot would then be disruption for no benefit, and is enabled only
+    when a pending update actually reports needing a restart.
+
+    REPEAT UNTIL CLEAR
+
+    Ticking the checkbox makes "Install updates and restart" run unattended cycles:
+    install, restart, reopen at logon, rescan, repeat. State lives in
+    -UpdateLoopStateFile and the relaunch is an HKCU RunOnce entry, re-registered each
+    cycle; RunOnce self-deletes when it fires, so an interrupted loop leaves nothing that
+    would relaunch this app at every future logon. The user still logs in by hand - no
+    credentials are stored anywhere.
+
+    Because this reboots the machine on its own, it is bounded three independent ways and
+    stops on any of them, clearing both the state file and the logon hook:
+      - nothing pending (the success case)
+      - -MaxUpdateLoopCycles cycles reached
+      - the pending count stopped falling, so another restart would not help
+    It also stops if an install or a scan fails, if the box is unticked mid-loop, and it
+    will not resume if the app is reopened without -ResumeUpdateLoop.
+
+    Note the RunOnce command line is capped at 260 characters, so settings a resumed run
+    needs are carried in the state file rather than as arguments; Register-ResumeAtLogon
+    throws if the command would still exceed it, rather than silently not resuming.
 
     COMPLIANCE SEQUENCE (Check compliance button)
 
@@ -64,8 +86,10 @@
       2. Start GR-RunIntuneComplianceCheck, which runs deviceenroller.exe elevated.
          Wait for the task to leave the Running state.
       3. Wait -PostTaskWaitSeconds so the refreshed state lands in the cache.
-      4. Relaunch Company Portal in the background and leave it running.
-      5. Read the verdict out of the newest cache file (see Get-ComplianceVerdictFromCache).
+      4. Relaunch Company Portal in the background so it refreshes the cache.
+      5. Read the verdict out of the newest cache file (see Get-ComplianceVerdictFromCache),
+         then close Company Portal - read first, close second, since the cache has to still
+         be maintained while it is read. The user is warned up front to leave it alone.
 
       GR-InstallIntuneUpdates.ps1 must install pending updates and MUST NOT reboot.
       Reboot is owned by this GUI so that "install only" is genuinely reboot-free and
@@ -154,7 +178,18 @@ param(
     [string]$InstallResultFile = 'C:\ProgramData\GR\IntuneSelfService\install-result.json',
 
     [ValidateNotNullOrEmpty()]
-    [string]$ImeLogDirectory = 'C:\ProgramData\Microsoft\IntuneManagementExtension\Logs'
+    [string]$ImeLogDirectory = 'C:\ProgramData\Microsoft\IntuneManagementExtension\Logs',
+
+    # Set by the logon hook this app registers for itself; not meant to be passed by hand.
+    [switch]$ResumeUpdateLoop,
+
+    [ValidateNotNullOrEmpty()]
+    [string]$UpdateLoopStateFile = (Join-Path $env:LOCALAPPDATA 'GR\IntuneSelfService\update-loop.json'),
+    # Keep in step with the default above; Register-ResumeAtLogon only passes the path when
+    # it differs, to stay inside the RunOnce length cap.
+
+    [ValidateRange(1, 20)]
+    [int]$MaxUpdateLoopCycles = 10
 )
 
 Set-StrictMode -Version Latest
@@ -186,6 +221,34 @@ $script:IsBusy = $false
 # This window's HWND, resolved once the window has a handle. Handed to the compliance
 # worker so it can give focus back after launching Company Portal.
 $script:OwnWindowHandle = [System.IntPtr]::Zero
+$script:InPollTick = $false
+$script:LoopActive = $false
+$script:InstallWillRestart = $false
+
+# RunOnce, not Run: it self-deletes when it fires, so an interrupted loop cannot relaunch
+# this app at every future logon. Each cycle re-registers it.
+$RUNONCE_KEY = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\RunOnce'
+$RUNONCE_VALUE = 'GRIntuneSelfServiceResumeUpdates'
+$RUNONCE_MAX_LENGTH = 260    # documented cap on Run/RunOnce command lines
+$DEFAULT_LOOP_STATE_FILE = (Join-Path $env:LOCALAPPDATA 'GR\IntuneSelfService\update-loop.json')
+
+# A resumed run is launched by RunOnce with almost no arguments, so anything overridable is
+# recovered from the state file - unless it was passed explicitly, which wins. Done here at
+# script scope, before the window exists, so the handlers see the final values.
+if ($ResumeUpdateLoop -and (Test-Path -LiteralPath $UpdateLoopStateFile)) {
+    try {
+        $carried = Get-Content -LiteralPath $UpdateLoopStateFile -Raw | ConvertFrom-Json
+        foreach ($name in @('TaskPath', 'InstallResultFile')) {
+            if (-not $PSBoundParameters.ContainsKey($name) -and
+                $carried.PSObject.Properties.Name -contains $name -and $carried.$name) {
+                Set-Variable -Name $name -Scope Script -Value ([string]$carried.$name)
+            }
+        }
+    }
+    catch {
+        Write-Verbose "Could not read carried settings from loop state: $_"
+    }
+}
 
 #region XAML
 # Single-quoted here-string: XAML must not be subject to PowerShell interpolation.
@@ -267,6 +330,47 @@ $xamlText = @'
     <Style x:Key="SecondaryButton" TargetType="Button" BasedOn="{StaticResource FlatButton}">
       <Setter Property="Background" Value="{StaticResource AccentSoft}"/>
       <Setter Property="Foreground" Value="{StaticResource Fg}"/>
+    </Style>
+
+    <Style x:Key="AppCheckBox" TargetType="CheckBox">
+      <Setter Property="Foreground" Value="{StaticResource Fg}"/>
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="CheckBox">
+            <Grid Background="Transparent">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+              </Grid.ColumnDefinitions>
+              <Border x:Name="Box" Width="17" Height="17" CornerRadius="4"
+                      Background="#FF14141E" BorderBrush="{StaticResource CardStroke}"
+                      BorderThickness="1" VerticalAlignment="Top">
+                <TextBlock x:Name="Tick" Text="&#x2713;" Foreground="#FF101018"
+                           FontSize="11" FontWeight="Bold" Visibility="Collapsed"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+              </Border>
+              <ContentPresenter Grid.Column="1" Margin="9,0,0,0" VerticalAlignment="Center"
+                                RecognizesAccessKey="True"/>
+            </Grid>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsChecked" Value="True">
+                <Setter TargetName="Box" Property="Background" Value="{StaticResource Accent}"/>
+                <Setter TargetName="Box" Property="BorderBrush" Value="{StaticResource Accent}"/>
+                <Setter TargetName="Tick" Property="Visibility" Value="Visible"/>
+              </Trigger>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="Box" Property="BorderBrush" Value="{StaticResource Accent}"/>
+              </Trigger>
+              <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.4"/>
+                <Setter Property="Cursor" Value="Arrow"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
     </Style>
 
     <Style x:Key="TitleBarButton" TargetType="Button">
@@ -478,20 +582,28 @@ $xamlText = @'
               </Grid>
             </Border>
 
-            <Grid Grid.Row="2" Margin="0,14,0,0">
-              <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="12"/>
-                <ColumnDefinition Width="*"/>
-              </Grid.ColumnDefinitions>
-              <Button x:Name="BtnInstall" Grid.Column="0" Content="Install updates"
-                      Style="{StaticResource FlatButton}"
-                      ToolTip="Installs all pending updates. The machine will not restart."/>
-              <Button x:Name="BtnInstallRestart" Grid.Column="2"
-                      Content="Install updates and restart"
-                      Style="{StaticResource SecondaryButton}"
-                      ToolTip="Installs all pending updates, then restarts this machine."/>
-            </Grid>
+            <StackPanel Grid.Row="2" Margin="0,14,0,0">
+              <CheckBox x:Name="ChkRepeatUntilClear" Style="{StaticResource AppCheckBox}"
+                        Margin="2,0,0,12"
+                        ToolTip="Installs, restarts, reopens this app at logon and repeats until nothing is pending.">
+                <TextBlock TextWrapping="Wrap">Keep installing and restarting until no updates remain<LineBreak/><Run Foreground="#FF9797AE" FontSize="11">Reopens this app automatically after each restart. You will be asked to log back in each time.</Run></TextBlock>
+              </CheckBox>
+
+              <Grid>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*"/>
+                  <ColumnDefinition Width="12"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button x:Name="BtnInstall" Grid.Column="0" Content="Install updates"
+                        Style="{StaticResource FlatButton}"
+                        ToolTip="Installs all pending updates. The machine will not restart."/>
+                <Button x:Name="BtnInstallRestart" Grid.Column="2"
+                        Content="Install updates and restart"
+                        Style="{StaticResource SecondaryButton}"
+                        ToolTip="Enabled only when a pending update needs a restart to finish."/>
+              </Grid>
+            </StackPanel>
           </Grid>
         </Border>
       </Grid>
@@ -518,6 +630,92 @@ $xamlText = @'
 '@
 #endregion XAML
 
+#region Dialog XAML
+# A dialog window styled like the app, replacing System.Windows.MessageBox - whose Win32
+# chrome looks nothing like the rest of this. Carries its own copy of the styles it needs,
+# because a separate Window cannot see the main window's resources.
+$dialogXamlText = @'
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        WindowStyle="None" ResizeMode="NoResize" ShowInTaskbar="False"
+        AllowsTransparency="True" Background="Transparent"
+        SizeToContent="Height" Width="460"
+        WindowStartupLocation="CenterOwner"
+        FontFamily="Segoe UI Variable Text, Segoe UI" UseLayoutRounding="True">
+  <Window.Resources>
+    <SolidColorBrush x:Key="CardBg"     Color="#FF1A1A26"/>
+    <SolidColorBrush x:Key="CardStroke" Color="#FF2B2B3C"/>
+    <SolidColorBrush x:Key="Fg"         Color="#FFEDEDF5"/>
+    <SolidColorBrush x:Key="FgMuted"    Color="#FFA6A6BC"/>
+    <SolidColorBrush x:Key="Accent"     Color="#FF4C8DFF"/>
+    <SolidColorBrush x:Key="AccentSoft" Color="#FF27314A"/>
+
+    <Style x:Key="DlgButton" TargetType="Button">
+      <Setter Property="Foreground" Value="#FFFFFFFF"/>
+      <Setter Property="Background" Value="{StaticResource Accent}"/>
+      <Setter Property="FontSize" Value="12.5"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Height" Value="36"/>
+      <Setter Property="MinWidth" Value="104"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="Bd" CornerRadius="7" Background="{TemplateBinding Background}"
+                    Padding="16,0">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="Bd" Property="Opacity" Value="0.88"/>
+              </Trigger>
+              <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="Bd" Property="Opacity" Value="0.72"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+    <Style x:Key="DlgButtonQuiet" TargetType="Button" BasedOn="{StaticResource DlgButton}">
+      <Setter Property="Background" Value="{StaticResource AccentSoft}"/>
+      <Setter Property="Foreground" Value="{StaticResource Fg}"/>
+    </Style>
+  </Window.Resources>
+
+  <Border Background="{StaticResource CardBg}" CornerRadius="12"
+          BorderBrush="{StaticResource CardStroke}" BorderThickness="1" Padding="24">
+    <StackPanel>
+      <Grid x:Name="DlgDragArea" Background="Transparent">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid Width="36" Height="36" VerticalAlignment="Top">
+          <Ellipse x:Name="DlgIconDot" Width="36" Height="36" Fill="{StaticResource Accent}"/>
+          <TextBlock x:Name="DlgIconGlyph" Text="i" Foreground="#FF101018"
+                     FontSize="19" FontWeight="Bold"
+                     HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Grid>
+        <StackPanel Grid.Column="1" Margin="15,0,0,0">
+          <TextBlock x:Name="DlgTitle" Foreground="{StaticResource Fg}" FontSize="15.5"
+                     FontWeight="SemiBold" TextWrapping="Wrap"/>
+          <TextBlock x:Name="DlgMessage" Foreground="{StaticResource FgMuted}" FontSize="12.5"
+                     TextWrapping="Wrap" Margin="0,9,0,0" LineHeight="19"/>
+        </StackPanel>
+      </Grid>
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,22,0,0">
+        <Button x:Name="DlgSecondary" Content="Cancel" Margin="0,0,10,0"
+                Style="{StaticResource DlgButtonQuiet}" Visibility="Collapsed"/>
+        <Button x:Name="DlgPrimary" Content="OK" Style="{StaticResource DlgButton}"
+                IsDefault="True"/>
+      </StackPanel>
+    </StackPanel>
+  </Border>
+</Window>
+'@
+#endregion Dialog XAML
+
 [xml]$xamlDoc = $xamlText
 $reader = New-Object System.Xml.XmlNodeReader $xamlDoc
 $window = [Windows.Markup.XamlReader]::Load($reader)
@@ -531,7 +729,7 @@ foreach ($name in @(
         'TxtComplianceDetail', 'TxtEnrollment', 'BtnCheckCompliance',
         'BtnSyncDevice', 'SyncStatusRow', 'SyncDot', 'SyncGlyph', 'TxtSyncState', 'TxtSyncDetail',
         'TxtUpdatesHeader', 'TxtUpdatesSub', 'BtnRescan', 'LstUpdates', 'TxtUpdatesEmpty',
-        'BtnInstall', 'BtnInstallRestart', 'Progress', 'TxtStatus')) {
+        'BtnInstall', 'BtnInstallRestart', 'ChkRepeatUntilClear', 'Progress', 'TxtStatus')) {
     $control = $window.FindName($name)
     if ($null -eq $control) { throw "XAML is missing an element named '$name'." }
     $ui[$name] = $control
@@ -572,35 +770,52 @@ function Start-AsyncWork {
 $pollTimer = New-Object System.Windows.Threading.DispatcherTimer
 $pollTimer.Interval = [TimeSpan]::FromMilliseconds(250)
 $pollTimer.Add_Tick({
-        for ($i = $script:Jobs.Count - 1; $i -ge 0; $i--) {
-            $job = $script:Jobs[$i]
-
-            # Drain any new progress lines the worker wrote, whether or not it has finished.
-            $info = $job.Shell.Streams.Information
-            if ($info.Count -gt $job.Reported) {
-                $ui['TxtStatus'].Text = [string]$info[$info.Count - 1].MessageData
-                $job.Reported = $info.Count
-            }
-
-            if (-not $job.Handle.IsCompleted) { continue }
-
-            $script:Jobs.RemoveAt($i)
-            try {
-                $output = $job.Shell.EndInvoke($job.Handle)
-                # A terminating error inside the runspace surfaces here, not as an exception.
-                if ($job.Shell.HadErrors -and $job.Shell.Streams.Error.Count -gt 0) {
-                    throw $job.Shell.Streams.Error[0].Exception
-                }
-                & $job.OnSuccess $output
-            }
-            catch {
-                & $job.OnFailure $_
-            }
-            finally {
-                $job.Shell.Dispose()
-            }
+        # Continuations can open a modal dialog, and ShowDialog pumps a nested message loop
+        # that keeps firing this timer. Without a guard the same job list would be processed
+        # re-entrantly while an earlier tick is still blocked on the dialog.
+        if ($script:InPollTick) { return }
+        $script:InPollTick = $true
+        try {
+            Invoke-JobPoll
+        }
+        finally {
+            $script:InPollTick = $false
         }
     })
+
+function Invoke-JobPoll {
+    [CmdletBinding()]
+    param()
+
+    for ($i = $script:Jobs.Count - 1; $i -ge 0; $i--) {
+        $job = $script:Jobs[$i]
+
+        # Drain any new progress lines the worker wrote, whether or not it has finished.
+        $info = $job.Shell.Streams.Information
+        if ($info.Count -gt $job.Reported) {
+            $ui['TxtStatus'].Text = [string]$info[$info.Count - 1].MessageData
+            $job.Reported = $info.Count
+        }
+
+        if (-not $job.Handle.IsCompleted) { continue }
+
+        $script:Jobs.RemoveAt($i)
+        try {
+            $output = $job.Shell.EndInvoke($job.Handle)
+            # A terminating error inside the runspace surfaces here, not as an exception.
+            if ($job.Shell.HadErrors -and $job.Shell.Streams.Error.Count -gt 0) {
+                throw $job.Shell.Streams.Error[0].Exception
+            }
+            & $job.OnSuccess $output
+        }
+        catch {
+            & $job.OnFailure $_
+        }
+        finally {
+            $job.Shell.Dispose()
+        }
+    }
+}
 #endregion Async plumbing
 
 #region Worker scriptblocks
@@ -962,12 +1177,18 @@ $checkComplianceWork = {
     Write-Information "Waiting $PostTaskWaitSeconds s for the refreshed state to reach the cache..."
     Start-Sleep -Seconds $PostTaskWaitSeconds
 
-    # --- 4. Reopen Company Portal and leave it running ----------------------------------
+    # --- 4. Reopen Company Portal so it refreshes the cache -----------------------------
     Start-CompanyPortalInBackground
 
-    # --- 5. Read the verdict ------------------------------------------------------------
+    # --- 5. Read the verdict, then close Company Portal ---------------------------------
     Write-Information 'Reading compliance state from the cache...'
-    Get-ComplianceVerdictFromCache -Path $CacheDirectory
+    $verdict = Get-ComplianceVerdictFromCache -Path $CacheDirectory
+
+    # Read first, close second: the cache must still be being maintained while it is read.
+    # Closing it afterwards means the user is not left with a window they did not open.
+    Stop-CompanyPortal
+
+    $verdict
 }
 
 $syncDeviceWork = {
@@ -1152,10 +1373,14 @@ function Update-ActionState {
         $ui[$key].IsEnabled = -not $script:IsBusy
     }
 
-    # The install buttons need both conditions: not busy AND something to install.
+    # Install needs something to install; install-and-restart additionally needs at least
+    # one update that actually wants a restart, so the button cannot offer a pointless reboot.
     $hasUpdates = @($script:PendingUpdates).Count -gt 0
+    $needsRestart = @($script:PendingUpdates | Where-Object { $_.NeedsReboot }).Count -gt 0
+
     $ui['BtnInstall'].IsEnabled = (-not $script:IsBusy) -and $hasUpdates
-    $ui['BtnInstallRestart'].IsEnabled = (-not $script:IsBusy) -and $hasUpdates
+    $ui['BtnInstallRestart'].IsEnabled = (-not $script:IsBusy) -and $needsRestart
+    $ui['ChkRepeatUntilClear'].IsEnabled = (-not $script:IsBusy) -and $needsRestart
 }
 
 function Set-Busy {
@@ -1189,6 +1414,61 @@ function Set-ComplianceIndicator {
     $ui['ComplianceGlyph'].Text = [string]$look.Glyph
     $ui['TxtComplianceState'].Text = $look.Label
     if ($PSBoundParameters.ContainsKey('Detail')) { $ui['TxtComplianceDetail'].Text = $Detail }
+}
+
+function Show-AppDialog {
+    <#
+        Modal dialog in the app's own styling. Returns $true when the primary button was
+        pressed, $false otherwise (including the Esc key), so an OKCancel dialog reads as
+        `if (Show-AppDialog ...) { ... }`.
+    #>
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][string]$Title,
+        [string]$Message = '',
+        [ValidateSet('Info', 'Success', 'Warning', 'Error', 'Question')][string]$Icon = 'Info',
+        [switch]$Cancellable,
+        [string]$PrimaryText = 'OK',
+        [string]$SecondaryText = 'Cancel'
+    )
+
+    [xml]$doc = $dialogXamlText
+    $dlg = [Windows.Markup.XamlReader]::Load((New-Object System.Xml.XmlNodeReader $doc))
+
+    $look = switch ($Icon) {
+        'Success' { @{ Colour = '#FF22C55E'; Glyph = [char]0x2713 } }
+        'Warning' { @{ Colour = '#FFF59E0B'; Glyph = '!' } }
+        'Error' { @{ Colour = '#FFEF4444'; Glyph = [char]0x2715 } }
+        'Question' { @{ Colour = '#FF4C8DFF'; Glyph = '?' } }
+        default { @{ Colour = '#FF4C8DFF'; Glyph = 'i' } }
+    }
+
+    $dlg.FindName('DlgIconDot').Fill =
+    (New-Object System.Windows.Media.BrushConverter).ConvertFromString($look.Colour)
+    $dlg.FindName('DlgIconGlyph').Text = [string]$look.Glyph
+    $dlg.FindName('DlgTitle').Text = $Title
+    $dlg.FindName('DlgMessage').Text = $Message
+    $dlg.FindName('DlgPrimary').Content = $PrimaryText
+
+    # GetNewClosure so the handlers capture *this* dialog rather than resolving $dlg from
+    # whatever scope happens to be current when the click fires.
+    $secondary = $dlg.FindName('DlgSecondary')
+    if ($Cancellable) {
+        $secondary.Content = $SecondaryText
+        $secondary.Visibility = 'Visible'
+        $secondary.IsCancel = $true   # Esc also closes with $false
+        $secondary.Add_Click({ $dlg.DialogResult = $false }.GetNewClosure())
+    }
+
+    $dlg.FindName('DlgPrimary').Add_Click({ $dlg.DialogResult = $true }.GetNewClosure())
+    # No chrome, so the header doubles as the drag handle.
+    $dlg.FindName('DlgDragArea').Add_MouseLeftButtonDown({ $dlg.DragMove() }.GetNewClosure())
+
+    # Owned and centred on the app, so it behaves like part of it rather than a stray window.
+    if ($window.IsVisible) { $dlg.Owner = $window }
+
+    $result = $dlg.ShowDialog()
+    return ($result -eq $true)
 }
 
 function Set-SyncIndicator {
@@ -1248,6 +1528,144 @@ function Show-Updates {
     Update-ActionState
 }
 
+#region Repeat-until-clear loop
+# An unattended install/restart cycle, so it is bounded on three independent axes: a cycle
+# ceiling, a no-progress detector, and a user-visible stop. Without those, one update that
+# fails and re-offers itself forever would reboot the machine forever.
+
+function Get-UpdateLoopState {
+    if (-not (Test-Path -LiteralPath $UpdateLoopStateFile)) { return $null }
+    try {
+        return Get-Content -LiteralPath $UpdateLoopStateFile -Raw | ConvertFrom-Json
+    }
+    catch {
+        Write-Verbose "Unreadable loop state, ignoring: $_"
+        return $null
+    }
+}
+
+function Save-UpdateLoopState {
+    param([Parameter(Mandatory)][hashtable]$State)
+
+    # Carried in the file rather than on the RunOnce command line, which is length-capped.
+    # A resumed run picks these up unless they were passed explicitly.
+    $State['TaskPath'] = $TaskPath
+    $State['InstallResultFile'] = $InstallResultFile
+
+    $dir = [System.IO.Path]::GetDirectoryName($UpdateLoopStateFile)
+    if ($dir -and -not (Test-Path -LiteralPath $dir)) {
+        $null = New-Item -ItemType Directory -Path $dir -Force
+    }
+    $State | ConvertTo-Json -Depth 3 | Set-Content -LiteralPath $UpdateLoopStateFile -Encoding UTF8
+}
+
+function Clear-UpdateLoop {
+    <#
+        Belt and braces: remove both the state file and the logon hook, so an abandoned loop
+        cannot resurrect itself after the user thinks it has stopped.
+    #>
+    Unregister-ResumeAtLogon
+    if (Test-Path -LiteralPath $UpdateLoopStateFile) {
+        Remove-Item -LiteralPath $UpdateLoopStateFile -Force -ErrorAction SilentlyContinue
+    }
+    $script:LoopActive = $false
+}
+
+function Register-ResumeAtLogon {
+    <#
+        RunOnce rather than Run: it self-deletes when it fires, so a crash mid-cycle leaves
+        nothing behind that would relaunch this app at every future logon. Each cycle
+        re-registers it. HKCU, so no elevation and it only affects this user.
+
+        Run/RunOnce command lines are capped at 260 characters, which is easily blown by a
+        few quoted paths. So the settings a resumed run needs live in the state file, and
+        only the state file path is passed - and only when it is not the default.
+    #>
+    $exe = "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe"
+    $parts = @(
+        "`"$exe`"", '-STA', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-WindowStyle', 'Hidden',
+        '-File', "`"$PSCommandPath`"", '-ResumeUpdateLoop'
+    )
+    if ($UpdateLoopStateFile -ne $DEFAULT_LOOP_STATE_FILE) {
+        $parts += @('-UpdateLoopStateFile', "`"$UpdateLoopStateFile`"")
+    }
+    $command = $parts -join ' '
+
+    if ($command.Length -gt $RUNONCE_MAX_LENGTH) {
+        # Fail loudly here rather than silently not resuming after the restart.
+        throw ("Cannot set up the restart hook: the command is $($command.Length) characters " +
+            "and RunOnce accepts at most $RUNONCE_MAX_LENGTH. Move this script to a shorter path, " +
+            'or run without the repeat option.')
+    }
+
+    $null = New-ItemProperty -Path $RUNONCE_KEY -Name $RUNONCE_VALUE `
+        -Value $command -PropertyType String -Force
+}
+
+function Unregister-ResumeAtLogon {
+    Remove-ItemProperty -Path $RUNONCE_KEY -Name $RUNONCE_VALUE -ErrorAction SilentlyContinue
+}
+
+function Resolve-UpdateLoop {
+    <#
+        Called after a scan completes while a loop is active. Decides whether to run another
+        install/restart cycle or stop, and reports why.
+    #>
+    $state = Get-UpdateLoopState
+    if (-not $state) { $script:LoopActive = $false; Update-ActionState; return }
+
+    $pending = @($script:PendingUpdates).Count
+    $cycle = [int]$state.Cycle
+    $max = [int]$state.MaxCycles
+    $previous = [int]$state.LastPendingCount
+
+    # Done: nothing left to install.
+    if ($pending -eq 0) {
+        Clear-UpdateLoop
+        Update-ActionState
+        Set-Busy -Busy $false -Message "Finished - no updates pending after $cycle restart(s)."
+        [void](Show-AppDialog -Title 'All updates installed' -Icon 'Success' -Message (
+                "This device is now up to date. It took $cycle install/restart cycle(s)." ))
+        return
+    }
+
+    # Give up: too many cycles.
+    if ($cycle -ge $max) {
+        Clear-UpdateLoop
+        Update-ActionState
+        Set-Busy -Busy $false -Message "Stopped after $cycle cycles with $pending update(s) still pending."
+        [void](Show-AppDialog -Title 'Stopped repeating' -Icon 'Warning' -Message (
+                "After $cycle install and restart cycles, $pending update(s) are still pending, " +
+                'so the loop was stopped rather than restarting again. Install them manually or contact IT.' ))
+        return
+    }
+
+    # Give up: the pending count is not coming down, so another reboot will not help.
+    if ($previous -gt 0 -and $pending -ge $previous) {
+        Clear-UpdateLoop
+        Update-ActionState
+        Set-Busy -Busy $false -Message "Stopped - $pending update(s) pending and not reducing."
+        [void](Show-AppDialog -Title 'Stopped repeating' -Icon 'Warning' -Message (
+                "The same $pending update(s) are still pending after a restart, so repeating " +
+                'would not help. They may need manual attention - contact IT if they keep failing.' ))
+        return
+    }
+
+    # Another go.
+    $next = $cycle + 1
+    Save-UpdateLoopState @{
+        Active           = $true
+        Cycle            = $next
+        MaxCycles        = $max
+        StartedAt        = [string]$state.StartedAt
+        LastPendingCount = $pending
+    }
+    Register-ResumeAtLogon
+    Set-Busy -Busy $false -Message "Cycle $next of $max - installing $pending update(s), then restarting..."
+    Start-UpdateInstall -WithRestart
+}
+#endregion Repeat-until-clear loop
+
 function Get-InstallReport {
     <#
         Normalises whatever the install worker returned into a status line plus a
@@ -1303,15 +1721,22 @@ function Show-InstallOutcome {
     }
 
     $icon = switch ($Report.Outcome) {
-        'Success' { [System.Windows.MessageBoxImage]::Information }
-        'NothingToDo' { [System.Windows.MessageBoxImage]::Information }
-        'PartialSuccess' { [System.Windows.MessageBoxImage]::Warning }
-        'Failed' { [System.Windows.MessageBoxImage]::Error }
-        default { [System.Windows.MessageBoxImage]::Information }
+        'Success' { 'Success' }
+        'NothingToDo' { 'Info' }
+        'PartialSuccess' { 'Warning' }
+        'Failed' { 'Error' }
+        default { 'Info' }
     }
 
-    [void][System.Windows.MessageBox]::Show($body, 'Update installation',
-        [System.Windows.MessageBoxButton]::OK, $icon)
+    $title = switch ($Report.Outcome) {
+        'Success' { 'Updates installed' }
+        'NothingToDo' { 'Already up to date' }
+        'PartialSuccess' { 'Some updates failed' }
+        'Failed' { 'Installation failed' }
+        default { 'Update installation' }
+    }
+
+    [void](Show-AppDialog -Title $title -Message $body -Icon $icon)
 }
 
 function Show-Failure {
@@ -1319,8 +1744,7 @@ function Show-Failure {
 
     $message = $ErrorRecord.Exception.Message
     Set-Busy -Busy $false -Message "$Context failed: $message"
-    [void][System.Windows.MessageBox]::Show($message, "$Context failed",
-        [System.Windows.MessageBoxButton]::OK, [System.Windows.MessageBoxImage]::Error)
+    [void](Show-AppDialog -Title "$Context failed" -Message $message -Icon 'Error')
 }
 
 function Start-UpdateScan {
@@ -1332,12 +1756,80 @@ function Start-UpdateScan {
         param($result)
         Show-Updates -Updates $result
         Set-Busy -Busy $false -Message "Scan complete - $($script:PendingUpdates.Count) update(s) pending."
+        # A scan is the loop's decision point: it is what tells us whether to go round again.
+        if ($script:LoopActive) { Resolve-UpdateLoop }
     } -OnFailure {
         param($err)
         Show-Updates -Updates @()
         $ui['TxtUpdatesEmpty'].Text = 'Could not read Windows Update.'
         $ui['TxtUpdatesEmpty'].Visibility = 'Visible'
+        if ($script:LoopActive) {
+            # Can't decide without a scan, so stop rather than reboot blindly.
+            Clear-UpdateLoop
+            Update-ActionState
+        }
         Show-Failure -ErrorRecord $err -Context 'Update scan'
+    }
+}
+
+function Start-UpdateInstall {
+    <#
+        Single install path for all three entry points - the two buttons and a loop cycle.
+        The intent is stashed in script scope rather than captured in the continuation,
+        because a scriptblock that is not GetNewClosure()'d resolves variables when it runs,
+        by which time this function's locals are gone.
+    #>
+    param([switch]$WithRestart)
+
+    $script:InstallWillRestart = [bool]$WithRestart
+    Set-Busy -Busy $true -Message $(if ($WithRestart) {
+            'Installing updates, then restarting...'
+        }
+        else {
+            'Installing updates. This machine will not restart.'
+        })
+
+    Start-AsyncWork -Work $installUpdatesWork -Arguments @{
+        TaskName       = $TASK_INSTALL_UPDATES
+        TaskPath       = $TaskPath
+        ResultFile     = $InstallResultFile
+        TimeoutSeconds = $TASK_TIMEOUT_SECONDS
+        NotBeforeUtc   = (Get-Date).ToUniversalTime()
+    } -OnSuccess {
+        param($result)
+        $report = Get-InstallReport -Result $result
+        $restart = $script:InstallWillRestart
+        $looping = $script:LoopActive
+
+        # Never restart for an install that put nothing on the machine - that is disruption
+        # with no benefit, and in a loop it would spin forever.
+        $pointless = $report.Outcome -eq 'Failed' -or $report.Outcome -eq 'NothingToDo'
+
+        if ($restart -and -not $pointless) {
+            $suffix = if ($looping) { " Cycle continues after you log back in." } else { '' }
+            Set-Busy -Busy $false -Message "$($report.Status) Restarting in $RESTART_DELAY_SECONDS seconds - run 'shutdown /a' to cancel.$suffix"
+            # The GUI owns the reboot, not the SYSTEM task, so "install only" stays genuinely
+            # reboot-free and the user always gets a cancellable countdown.
+            & "$env:SystemRoot\System32\shutdown.exe" '/r' '/t' $RESTART_DELAY_SECONDS `
+                '/c' 'Restarting to finish installing updates (requested from Device Self-Service).'
+            return
+        }
+
+        if ($restart -and $pointless) {
+            if ($looping) { Clear-UpdateLoop }
+            Set-Busy -Busy $false -Message "$($report.Status) Not restarting."
+            Show-InstallOutcome -Report $report -SuppressedRestart
+            Start-UpdateScan
+            return
+        }
+
+        Set-Busy -Busy $false -Message $report.Status
+        Show-InstallOutcome -Report $report
+        Start-UpdateScan
+    } -OnFailure {
+        param($err)
+        if ($script:LoopActive) { Clear-UpdateLoop; Update-ActionState }
+        Show-Failure -ErrorRecord $err -Context 'Update installation'
     }
 }
 #endregion UI helpers
@@ -1350,8 +1842,21 @@ $ui['BtnRescan'].Add_Click({ Start-UpdateScan })
 
 # 1. Compliance
 $ui['BtnCheckCompliance'].Add_Click({
+        # The check drives Company Portal, and a user closing it mid-sequence would empty
+        # the cache the verdict is read from. Say so before starting, not after it fails.
+        $proceed = Show-AppDialog -Title 'Company Portal will open' -Icon 'Question' -Cancellable `
+            -PrimaryText 'Start check' -Message (
+            'Company Portal will open in the background while this device is checked. ' +
+            "Please leave it alone - do not close it - until the check finishes.`n`n" +
+            'It will be closed automatically once the compliance status has been read. ' +
+            'The check takes about a minute.')
+        if (-not $proceed) {
+            $ui['TxtStatus'].Text = 'Compliance check cancelled.'
+            return
+        }
+
         Set-Busy -Busy $true -Message 'Starting compliance check...'
-        Set-ComplianceIndicator -State 'Checking' -Detail 'Priming the Company Portal cache, evaluating, then re-reading. This takes about a minute.'
+        Set-ComplianceIndicator -State 'Checking' -Detail 'Company Portal is open - please leave it alone until this finishes.'
 
         Start-AsyncWork -Work $checkComplianceWork -Arguments @{
             CacheDirectory        = $ComplianceCacheDirectory
@@ -1435,71 +1940,49 @@ $ui['BtnSyncDevice'].Add_Click({
     })
 
 # 2. Install, no restart
-$ui['BtnInstall'].Add_Click({
-        Set-Busy -Busy $true -Message 'Installing updates. This machine will not restart.'
+$ui['BtnInstall'].Add_Click({ Start-UpdateInstall })
 
-        Start-AsyncWork -Work $installUpdatesWork -Arguments @{
-            TaskName       = $TASK_INSTALL_UPDATES
-            TaskPath       = $TaskPath
-            ResultFile     = $InstallResultFile
-            TimeoutSeconds = $TASK_TIMEOUT_SECONDS
-            NotBeforeUtc   = (Get-Date).ToUniversalTime()
-        } -OnSuccess {
-            param($result)
-            $report = Get-InstallReport -Result $result
-            Set-Busy -Busy $false -Message $report.Status
-            Show-InstallOutcome -Report $report
-            # Anything still listed either failed or needs a restart to complete.
-            Start-UpdateScan
-        } -OnFailure {
-            param($err)
-            Show-Failure -ErrorRecord $err -Context 'Update installation'
-        }
-    })
-
-# 3. Install and restart
+# 3. Install and restart, optionally repeating until nothing is pending
 $ui['BtnInstallRestart'].Add_Click({
-        $count = if ($null -ne $script:PendingUpdates) { @($script:PendingUpdates).Count } else { 0 }
-        $answer = [System.Windows.MessageBox]::Show(
-            "Install $count pending update(s) and restart this machine?`n`nThe restart happens automatically once installation finishes. You will get a $RESTART_DELAY_SECONDS second warning and can cancel it by running: shutdown /a",
-            'Install updates and restart',
-            [System.Windows.MessageBoxButton]::OKCancel,
-            [System.Windows.MessageBoxImage]::Warning)
-        if ($answer -ne [System.Windows.MessageBoxResult]::OK) {
-            $ui['TxtStatus'].Text = 'Restart cancelled. Nothing was installed.'
+        $count = @($script:PendingUpdates).Count
+        $repeat = [bool]$ui['ChkRepeatUntilClear'].IsChecked
+
+        $message = if ($repeat) {
+            "This device will install $count pending update(s) and restart, then keep " +
+            "repeating until nothing is pending.`n`n" +
+            "After each restart you will need to log back in, and this app will reopen " +
+            "and continue on its own. It stops automatically when no updates remain, " +
+            "after $MaxUpdateLoopCycles cycles, or if the pending list stops shrinking.`n`n" +
+            "Each restart gives you $RESTART_DELAY_SECONDS seconds' warning, cancellable with: shutdown /a"
+        }
+        else {
+            "Install $count pending update(s) and restart this machine?`n`n" +
+            "The restart happens automatically once installation finishes. You will get " +
+            "$RESTART_DELAY_SECONDS seconds' warning and can cancel it by running: shutdown /a"
+        }
+
+        $title = if ($repeat) { 'Install, restart and repeat' } else { 'Install updates and restart' }
+        if (-not (Show-AppDialog -Title $title -Message $message -Icon 'Warning' -Cancellable `
+                    -PrimaryText $(if ($repeat) { 'Start' } else { 'Install and restart' }))) {
+            $ui['TxtStatus'].Text = 'Cancelled. Nothing was installed.'
             return
         }
 
-        Set-Busy -Busy $true -Message 'Installing updates, then restarting...'
-
-        Start-AsyncWork -Work $installUpdatesWork -Arguments @{
-            TaskName       = $TASK_INSTALL_UPDATES
-            TaskPath       = $TaskPath
-            ResultFile     = $InstallResultFile
-            TimeoutSeconds = $TASK_TIMEOUT_SECONDS
-            NotBeforeUtc   = (Get-Date).ToUniversalTime()
-        } -OnSuccess {
-            param($result)
-            $report = Get-InstallReport -Result $result
-
-            # Don't restart on the back of an installation that installed nothing - a
-            # reboot would be pure disruption with no updates to finish applying.
-            if ($report.Outcome -eq 'Failed' -or $report.Outcome -eq 'NothingToDo') {
-                Set-Busy -Busy $false -Message "$($report.Status) Not restarting."
-                Show-InstallOutcome -Report $report -SuppressedRestart
-                Start-UpdateScan
-                return
+        if ($repeat) {
+            # Record the loop before installing: the restart can land at any point after
+            # this, and the state file plus the RunOnce hook are what survive it.
+            $script:LoopActive = $true
+            Save-UpdateLoopState @{
+                Active           = $true
+                Cycle            = 1
+                MaxCycles        = $MaxUpdateLoopCycles
+                StartedAt        = (Get-Date).ToUniversalTime().ToString('o')
+                LastPendingCount = $count
             }
-
-            Set-Busy -Busy $false -Message "$($report.Status) Restarting in $RESTART_DELAY_SECONDS seconds - run 'shutdown /a' to cancel."
-            # The GUI owns the reboot, not the SYSTEM task, so "install only" stays
-            # genuinely reboot-free and the user always gets a cancellable countdown.
-            & "$env:SystemRoot\System32\shutdown.exe" '/r' '/t' $RESTART_DELAY_SECONDS `
-                '/c' 'Restarting to finish installing updates (requested from Device Self-Service).'
-        } -OnFailure {
-            param($err)
-            Show-Failure -ErrorRecord $err -Context 'Update installation'
+            Register-ResumeAtLogon
         }
+
+        Start-UpdateInstall -WithRestart
     })
 
 $window.Add_Loaded({
@@ -1535,7 +2018,32 @@ $window.Add_Loaded({
             $ui['TxtEnrollment'].Text = 'Enrolment state unavailable.'
         }
 
+        # Resuming a repeat-until-clear loop after a restart. The scan that Start-UpdateScan
+        # kicks off is the decision point: its continuation calls Resolve-UpdateLoop, which
+        # either starts another cycle or stops and explains why.
+        $resumeState = Get-UpdateLoopState
+        if ($ResumeUpdateLoop -and $resumeState -and $resumeState.Active) {
+            $script:LoopActive = $true
+            $ui['ChkRepeatUntilClear'].IsChecked = $true
+            Set-Busy -Busy $true -Message "Resuming after restart - cycle $($resumeState.Cycle) of $($resumeState.MaxCycles). Checking what is still pending..."
+        }
+        elseif ($resumeState) {
+            # State left over without the matching -ResumeUpdateLoop: the loop was abandoned
+            # (app reopened by hand, or a crash). Clear it rather than resume unprompted.
+            Clear-UpdateLoop
+        }
+
         Start-UpdateScan
+    })
+
+$ui['ChkRepeatUntilClear'].Add_Unchecked({
+        # Unticking mid-loop is the user's stop button: drop the state and the logon hook so
+        # nothing resumes after the next restart.
+        if ($script:LoopActive) {
+            Clear-UpdateLoop
+            Update-ActionState
+            $ui['TxtStatus'].Text = 'Repeat stopped. Any restart already counting down still happens - cancel it with: shutdown /a'
+        }
     })
 
 $window.Add_Closed({
