@@ -583,7 +583,15 @@ $xamlText = @'
             </Border>
 
             <StackPanel Grid.Row="2" Margin="0,14,0,0">
+              <!-- Hidden, not deleted. The repeat-until-clear machinery behind it is intact
+                   and still wired up (Save-UpdateLoopState / Resolve-UpdateLoop /
+                   Register-ResumeAtLogon / -ResumeUpdateLoop); only the way to switch it on
+                   from the UI is withdrawn. Collapsed rather than Hidden so it takes no
+                   layout space. To bring it back, delete this one attribute. While it is
+                   collapsed IsChecked stays false, so the install-and-restart button always
+                   takes its single-shot path. -->
               <CheckBox x:Name="ChkRepeatUntilClear" Style="{StaticResource AppCheckBox}"
+                        Visibility="Collapsed"
                         Margin="2,0,0,12"
                         ToolTip="Installs, restarts, reopens this app at logon and repeats until nothing is pending.">
                 <TextBlock TextWrapping="Wrap">Keep installing and restarting until no updates remain<LineBreak/><Run Foreground="#FF9797AE" FontSize="11">Reopens this app automatically after each restart. You will be asked to log back in each time.</Run></TextBlock>
