@@ -25,7 +25,7 @@
         tasks, so a machine with the files but no tasks - which looks installed but has
         no working buttons - is correctly reported as needing a reinstall.
       Detection rule, minimal alternative: File exists ->
-        %ProgramFiles%\GR\SelfServicePatching\GR-IntuneSelfServiceGui.ps1
+        %ProgramFiles%\GR\SelfServicePatching\GR-IntuneSelfServiceGui.exe
         (leave the "32-bit app on 64-bit clients" box UNCHECKED, or Intune will look in
         Program Files (x86), which is not where this installs.) This cannot tell versions
         apart, so it will not trigger upgrades.
@@ -69,7 +69,12 @@
 param(
     [string]$InstallRoot = $(if ($env:ProgramW6432) { $env:ProgramW6432 } else { $env:ProgramFiles }),
     [switch]$SkipTaskRegistration,
-    [switch]$SkipShortcut
+    [switch]$SkipShortcut,
+
+    # Passed through to the task registration script. Only needed when a device has more
+    # than one MDM device enrollment, which that script refuses to guess between; setting
+    # it here avoids having to edit anything inside the package.
+    [string]$EnrollmentId
 )
 
 Set-StrictMode -Version Latest
@@ -85,7 +90,10 @@ $VENDOR_FOLDER_NAME = 'GR'
 $VERSION_FILE_NAME = 'version.txt'
 $SHORTCUT_NAME = 'Self Service Patching'
 $ICON_FILE_NAME = 'SelfServicePatching.ico'
-$GUI_FILE_NAME = 'GR-IntuneSelfServiceGui.ps1'
+# The GUI ships compiled: AppLocker blocks the .ps1, and an exe needs no interpreter to be
+# allow-listed. It is a build artefact, NOT in the repo - drop it into this folder before
+# packaging. The missing-payload check below fails the install loudly if it is absent.
+$GUI_FILE_NAME = 'GR-IntuneSelfServiceGui.exe'
 $TASK_SCRIPT_NAME = 'New-GRIntuneScheduledTasks.ps1'
 
 # Everything the installed app needs. The task registration script is payload too: the
@@ -171,21 +179,23 @@ try {
     if (-not $SkipShortcut) {
         $startMenu = Join-Path $env:ProgramData 'Microsoft\Windows\Start Menu\Programs'
         $shortcutPath = Join-Path $startMenu "$SHORTCUT_NAME.lnk"
-        # -STA because WPF needs a single-threaded apartment; Hidden to suppress the
-        # console window that would otherwise sit behind the GUI.
-        $arguments = "-STA -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$guiPath`""
 
         $shell = New-Object -ComObject 'WScript.Shell'
         try {
             $shortcut = $shell.CreateShortcut($shortcutPath)
-            $shortcut.TargetPath = "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe"
-            $shortcut.Arguments = $arguments
+            # The compiled GUI is the target directly. It used to be powershell.exe with
+            # -STA -ExecutionPolicy Bypass -File <ps1>, which AppLocker blocks; the exe
+            # needs no arguments, and no interpreter has to be allow-listed.
+            $shortcut.TargetPath = $guiPath
+            $shortcut.Arguments = ''
             $shortcut.WorkingDirectory = $installDir
             $shortcut.Description = 'Check compliance, sync with Intune and install pending updates'
-            $shortcut.WindowStyle = 7   # launch minimised: the WPF window is the real UI
+            # Normal, NOT minimised. The old value of 7 existed to hide powershell.exe's
+            # console window; applied to a windowed exe it would start the GUI minimised.
+            $shortcut.WindowStyle = 1
             if (Test-Path -LiteralPath $iconTarget) { $shortcut.IconLocation = "$iconTarget,0" }
             $shortcut.Save()
-            Write-Log "Created Start Menu shortcut: $shortcutPath"
+            Write-Log "Created Start Menu shortcut: $shortcutPath -> $guiPath"
         }
         finally {
             [void][System.Runtime.InteropServices.Marshal]::ReleaseComObject($shell)
@@ -201,7 +211,14 @@ try {
         $taskScript = Join-Path $installDir $TASK_SCRIPT_NAME
         # -ScriptDirectory is the installed folder, so the SYSTEM task runs the copy under
         # Program Files rather than the user-writable C:\temp default.
-        & $taskScript -ScriptDirectory $installDir 4>&1 | ForEach-Object { Write-Log "  $_" }
+        #
+        # -Verbose with both the warning (4) and verbose (5) streams merged into the
+        # pipeline, so the enrollment lookup's own "which registry view, which bitness"
+        # line lands in install.log. Without it, an enrollment failure here says only that
+        # it failed, which is what made the WOW6432Node redirection hard to spot.
+        $taskArgs = @{ ScriptDirectory = $installDir; Verbose = $true }
+        if ($EnrollmentId) { $taskArgs['EnrollmentId'] = $EnrollmentId }
+        & $taskScript @taskArgs 4>&1 5>&1 | ForEach-Object { Write-Log "  $_" }
         Write-Log 'Scheduled tasks registered.'
     }
     else {
