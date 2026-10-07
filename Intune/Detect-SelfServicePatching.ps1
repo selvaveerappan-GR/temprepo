@@ -68,7 +68,9 @@ $SHORTCUT_NAME = 'Self Service Patching'
 $VERSION_FILE_NAME = 'version.txt'
 $TASK_PATH = '\GRIntune\'
 $REQUIRED_FILES = @(
-    'GR-IntuneSelfServiceGui.ps1',
+    # The GUI is the compiled exe, matching $GUI_FILE_NAME in the install script. If these
+    # two disagree the app is never detected and Intune reinstalls it on every cycle.
+    'GR-IntuneSelfServiceGui.exe',
     'GR-InstallIntuneUpdates.ps1',
     'New-GRIntuneScheduledTasks.ps1'
 )
