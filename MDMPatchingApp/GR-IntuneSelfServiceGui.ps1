@@ -149,12 +149,19 @@
     New-GRIntuneScheduledTasks.ps1 registered them into.
 
 .EXAMPLE
+    # Development, straight from source.
     powershell.exe -STA -NoProfile -ExecutionPolicy Bypass -File .\GR-IntuneSelfServiceGui.ps1
 
 .EXAMPLE
     # Shorter waits for testing the sequence.
     .\GR-IntuneSelfServiceGui.ps1 -CachePrimeWaitSeconds 5 -PostTaskWaitSeconds 5 `
         -CompanyPortalLaunchWaitSeconds 5
+
+.NOTES
+    SHIPS COMPILED. This script is the source; what gets deployed is
+    GR-IntuneSelfServiceGui.exe, because AppLocker blocks the .ps1. The exe must be built
+    for STA - WPF will not start otherwise, and the apartment check above says as much.
+    Parameters still work as command-line arguments on the compiled build.
 #>
 [CmdletBinding()]
 param(
@@ -195,10 +202,22 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-# WPF requires a single-threaded apartment. powershell.exe is STA by default; pwsh is not.
+# WPF requires a single-threaded apartment. powershell.exe is STA by default; pwsh is not,
+# and a compiled build is MTA unless it was built for STA - which is the most likely reason
+# to see this, so the message has to say so rather than only offer the interpreter fix.
 if ([System.Threading.Thread]::CurrentThread.GetApartmentState() -ne 'STA') {
-    throw 'This GUI must run in an STA thread. Relaunch with: powershell.exe -STA -NoProfile -File "' +
-        $PSCommandPath + '"'
+    $compiled = $false
+    try {
+        $compiled = [System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName -notmatch
+        '\\(powershell|powershell_ise|pwsh)\.exe$'
+    }
+    catch { }
+
+    if ($compiled) {
+        throw 'This GUI must run in a single-threaded apartment, and this build is not. Rebuild the exe with STA enabled (ps2exe -STA).'
+    }
+    throw ('This GUI must run in an STA thread. Relaunch with: powershell.exe -STA -NoProfile -File "' +
+        $PSCommandPath + '"')
 }
 
 Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase, System.Xaml
@@ -1352,19 +1371,47 @@ $syncDeviceWork = {
 
 $readEnrollmentWork = {
     # Local, read-only context only - this is enrollment state, not a compliance verdict.
-    $enrollments = Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\Enrollments' -ErrorAction SilentlyContinue |
-        Where-Object { $_.PSChildName -match '^\{?[0-9A-Fa-f-]{36}\}?$' }
+    #
+    # Reads the 64-bit view explicitly rather than via 'HKLM:\...'. For a 32-bit process on
+    # 64-bit Windows the registry provider redirects HKLM\SOFTWARE to WOW6432Node, where
+    # Enrollments does not exist, so the provider form reports "not enrolled" on a perfectly
+    # enrolled device. This GUI is normally launched 64-bit, but the shortcut is not the only
+    # way in, and a silently wrong answer is worse than none.
+    $view = if ([Environment]::Is64BitOperatingSystem) {
+        [Microsoft.Win32.RegistryView]::Registry64
+    }
+    else {
+        [Microsoft.Win32.RegistryView]::Default
+    }
 
-    foreach ($key in $enrollments) {
-        $props = Get-ItemProperty -Path $key.PSPath -ErrorAction SilentlyContinue
-        if ($props -and $props.PSObject.Properties.Name -contains 'EnrollmentState' -and
-            $props.PSObject.Properties.Name -contains 'ProviderID' -and $props.ProviderID) {
-            return [PSCustomObject]@{
-                Enrolled   = ($props.EnrollmentState -eq 1)
-                ProviderID = [string]$props.ProviderID
+    $base = [Microsoft.Win32.RegistryKey]::OpenBaseKey(
+        [Microsoft.Win32.RegistryHive]::LocalMachine, $view)
+    try {
+        $enrollments = $base.OpenSubKey('SOFTWARE\Microsoft\Enrollments')
+        if ($enrollments) {
+            try {
+                foreach ($name in $enrollments.GetSubKeyNames()) {
+                    if ($name -notmatch '^\{?[0-9A-Fa-f-]{36}\}?$') { continue }
+                    $sub = $enrollments.OpenSubKey($name)
+                    if (-not $sub) { continue }
+                    try {
+                        # GetValue yields $null when absent, so no property guard is needed.
+                        $providerId = $sub.GetValue('ProviderID', $null)
+                        $state = $sub.GetValue('EnrollmentState', $null)
+                        if ($providerId) {
+                            return [PSCustomObject]@{
+                                Enrolled   = ($state -eq 1)
+                                ProviderID = [string]$providerId
+                            }
+                        }
+                    }
+                    finally { $sub.Dispose() }
+                }
             }
+            finally { $enrollments.Dispose() }
         }
     }
+    finally { $base.Dispose() }
 
     [PSCustomObject]@{ Enrolled = $false; ProviderID = $null }
 }
@@ -1579,6 +1626,31 @@ function Clear-UpdateLoop {
     $script:LoopActive = $false
 }
 
+function Get-SelfLaunchCommand {
+    <#
+        The command that relaunches this app, as an array of already-quoted parts.
+
+        This ships compiled to an exe because AppLocker blocks the .ps1, and when compiled
+        the host process IS the app - so it is invoked directly. $PSCommandPath cannot be
+        used for that: in a compiled build it does not point at anything powershell.exe can
+        run, which would produce a RunOnce entry that fails silently after the reboot.
+        Running as a plain .ps1 (development) still needs powershell.exe with -File.
+    #>
+    $hostPath = ''
+    try { $hostPath = [System.Diagnostics.Process]::GetCurrentProcess().MainModule.FileName }
+    catch { }
+
+    if ($hostPath -and $hostPath -notmatch '\\(powershell|powershell_ise|pwsh)\.exe$') {
+        # Compiled: one short part, which also leaves far more of the 260-character
+        # RunOnce budget than the interpreter form.
+        return @("`"$hostPath`"")
+    }
+
+    $ps = "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe"
+    return @("`"$ps`"", '-STA', '-NoProfile', '-ExecutionPolicy', 'Bypass',
+        '-WindowStyle', 'Hidden', '-File', "`"$PSCommandPath`"")
+}
+
 function Register-ResumeAtLogon {
     <#
         RunOnce rather than Run: it self-deletes when it fires, so a crash mid-cycle leaves
@@ -1589,11 +1661,7 @@ function Register-ResumeAtLogon {
         few quoted paths. So the settings a resumed run needs live in the state file, and
         only the state file path is passed - and only when it is not the default.
     #>
-    $exe = "$env:SystemRoot\System32\WindowsPowerShell\v1.0\powershell.exe"
-    $parts = @(
-        "`"$exe`"", '-STA', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-WindowStyle', 'Hidden',
-        '-File', "`"$PSCommandPath`"", '-ResumeUpdateLoop'
-    )
+    $parts = @(Get-SelfLaunchCommand) + '-ResumeUpdateLoop'
     if ($UpdateLoopStateFile -ne $DEFAULT_LOOP_STATE_FILE) {
         $parts += @('-UpdateLoopStateFile', "`"$UpdateLoopStateFile`"")
     }
