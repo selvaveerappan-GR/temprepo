@@ -121,28 +121,67 @@ function Get-MdmEnrollmentId {
         Resolves the device's MDM enrollment GUID. Several GUID subkeys usually exist under
         Enrollments, most of them stale, so select on EnrollmentType 6 - the device
         enrollment deviceenroller.exe expects.
+
+        READS THE 64-BIT REGISTRY VIEW EXPLICITLY, and that is the whole point of this
+        function's shape. Intune runs Win32 app install commands in a 32-bit process, and
+        for a 32-bit process on 64-bit Windows the registry provider redirects
+        HKLM\SOFTWARE to HKLM\SOFTWARE\WOW6432Node - where Enrollments does not exist. So
+        'HKLM:\SOFTWARE\Microsoft\Enrollments' silently finds nothing when installed from
+        Company Portal while working perfectly in a 64-bit console or ISE. Going through
+        RegistryKey.OpenBaseKey with RegistryView.Registry64 bypasses redirection and gives
+        the same answer from either bitness.
+
+        Do not "simplify" this back to Get-ChildItem 'HKLM:\...'.
     #>
     [CmdletBinding()]
     param()
 
-    # The property must be tested for existence before it is read. Not every subkey under
-    # Enrollments carries EnrollmentType - some hold only Context/Status style values, and a
-    # key with no values at all makes Get-ItemProperty return $null. Under
-    # Set-StrictMode -Version Latest, reading a missing property on either is a terminating
-    # error ("The property 'EnrollmentType' cannot be found on this object"), so the plain
-    # (Get-ItemProperty ...).EnrollmentType form fails on the first such key.
-    $ids = @(
-        Get-ChildItem 'HKLM:\SOFTWARE\Microsoft\Enrollments' -ErrorAction SilentlyContinue |
-            Where-Object {
-                $props = Get-ItemProperty -LiteralPath $_.PSPath -ErrorAction SilentlyContinue
-                $props -and
-                ($props.PSObject.Properties.Name -contains 'EnrollmentType') -and
-                ($props.EnrollmentType -eq $MDM_DEVICE_ENROLLMENT_TYPE)
-            } | Select-Object -ExpandProperty PSChildName
-    )
+    # Registry64 is meaningless on a 32-bit OS, where there is only one view.
+    $view = if ([Environment]::Is64BitOperatingSystem) {
+        [Microsoft.Win32.RegistryView]::Registry64
+    }
+    else {
+        [Microsoft.Win32.RegistryView]::Default
+    }
+    Write-Verbose "Reading enrollments from the $view registry view (process is $(if ([Environment]::Is64BitProcess) { '64' } else { '32' })-bit)"
+
+    $ids = @()
+    $seen = @()          # every subkey and its EnrollmentType, for the failure message
+    $subKeyCount = 0
+
+    $base = [Microsoft.Win32.RegistryKey]::OpenBaseKey(
+        [Microsoft.Win32.RegistryHive]::LocalMachine, $view)
+    try {
+        $enrollments = $base.OpenSubKey('SOFTWARE\Microsoft\Enrollments')
+        if (-not $enrollments) {
+            throw "Registry key HKLM\SOFTWARE\Microsoft\Enrollments was not found in the $view view. This device does not appear to be MDM-enrolled."
+        }
+        try {
+            # GetValue returns $null for a missing value, so unlike the Get-ItemProperty
+            # form this needs no StrictMode property-existence guard.
+            foreach ($name in $enrollments.GetSubKeyNames()) {
+                $subKeyCount++
+                $sub = $enrollments.OpenSubKey($name)
+                if (-not $sub) { continue }
+                try {
+                    $type = $sub.GetValue('EnrollmentType', $null)
+                    if ($null -eq $type) { continue }
+                    $seen += "$name=$type"
+                    if ([int]$type -eq $MDM_DEVICE_ENROLLMENT_TYPE) { $ids += $name }
+                }
+                finally { $sub.Dispose() }
+            }
+        }
+        finally { $enrollments.Dispose() }
+    }
+    finally { $base.Dispose() }
 
     if ($ids.Count -eq 0) {
-        throw "No MDM device enrollment found under HKLM\SOFTWARE\Microsoft\Enrollments (EnrollmentType $MDM_DEVICE_ENROLLMENT_TYPE). This device does not appear to be Intune-enrolled, so $TASK_COMPLIANCE cannot be given a sync target."
+        # Report what was actually read, so the next failure is diagnosable from the log
+        # rather than needing this to be reproduced by hand.
+        $detail = if ($seen.Count -gt 0) { "Enrollments seen: $($seen -join ', ')." }
+        else { "None of the $subKeyCount subkey(s) carried an EnrollmentType value." }
+        throw "No MDM device enrollment (EnrollmentType $MDM_DEVICE_ENROLLMENT_TYPE) found under HKLM\SOFTWARE\Microsoft\Enrollments in the $view view. $detail So $TASK_COMPLIANCE cannot be given a sync target."
     }
     if ($ids.Count -gt 1) {
         # Interpolating an array would silently produce '/o id1 id2 /c /b', so refuse rather
