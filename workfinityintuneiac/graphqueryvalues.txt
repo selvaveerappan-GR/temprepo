@@ -1,0 +1,22 @@
+1. Go to https://developer.microsoft.com/graph/graph-explorer.
+2. Click Sign in (top right) and sign in with your account for the POC tenant, where policy 939b9d4e-… lives. If you're already signed in to another tenant, sign out first.
+3. Set the method to GET and the version to beta, then paste the URL for the first id:
+https://graph.microsoft.com/beta/deviceManagement/groupPolicyConfigurations('939b9d4e-abb8-4fe2-9e45-a73778c84aae')/definitionValues('52c52d07-171d-46b1-b97a-f3da66a65fa7')/presentationValues?$expand=presentation
+4. Click Run query. If it answers 403, open the Modify permissions tab and consent to DeviceManagementConfiguration.Read.All. If your organisation requires admin consent and you can't grant it, use option 2 or 3.
+5. Copy the response, swap in the next id, and repeat for all six.
+
+Option 2: PowerShell, all six in one go
+
+If the Microsoft Graph PowerShell module is installed (Install-Module Microsoft.Graph.Authentication -Scope CurrentUser if not):
+
+Connect-MgGraph -Scopes DeviceManagementConfiguration.Read.All -TenantId <poc-tenant-id-or-domain>
+
+$policy = "939b9d4e-abb8-4fe2-9e45-a73778c84aae"
+$ids = @{
+  "Include Vid/Pid Device"                             = "52c52d07-171d-46b1-b97a-f3da66a65fa7"
+  "Certificate verification mode"                      = "3e364c9c-3d5c-4ad6-bc61-caac0169dfbb"
+  "Client behavior when all sessions are disconnected" = "e55d7c50-6cc2-4997-ad95-b871b946fa6e"
+  "Hotkey combination to grab input focus"             = "cd1a6ad2-0a31-4a4c-9fd3-c50fd4a6e2f7"
+  "Hotkey combination to release input focus"          = "a6a6b1e8-7bf2-4926-be3b-bcafdc5e5831"
+  "Hide items in desktop context menu"                 = "ea5b853b-110f-4924-a8a0-d93733da0021"
+}
