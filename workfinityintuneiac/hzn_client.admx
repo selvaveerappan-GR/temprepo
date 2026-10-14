@@ -1,0 +1,3223 @@
+<?xml version="1.0" encoding="utf-8"?>
+<policyDefinitions revision="1.0" schemaVersion="1.0">
+  <policyNamespaces>
+    <target prefix="horizon_client" namespace="Horizon.Policies.Client" />
+    <using prefix="windows" namespace="Microsoft.Policies.Windows" />
+  </policyNamespaces>
+  <supersededAdm fileName="hzn_client.adm" />
+  <resources minRequiredRevision="1.0" />
+  <supportedOn>
+    <definitions>
+      <definition name="SUPPORTED_NotSpecified" displayName="$(string.VDMClient_SupportedOn_Empty)" />
+    </definitions>
+  </supportedOn>
+  <categories>
+    <category name="HorizonClient" displayName="$(string.HorizonClient)" />
+    <category name="HorizonClientUSB" displayName="$(string.HorizonClientUSB)">
+      <parentCategory ref="HorizonClient" />
+    </category>
+    <category name="HorizonPrintRedirection" displayName="$(string.HorizonPrintRedirection)">
+      <parentCategory ref="HorizonClient" />
+    </category>
+    <category name="HorizonClientOnlySetting" displayName="$(string.HorizonClientOnlySetting)">
+      <parentCategory ref="HorizonClientUSB" />
+    </category>
+    <category name="HorizonClientSecurity" displayName="$(string.HorizonClientSecurity)">
+      <parentCategory ref="HorizonClient" />
+    </category>
+    <category name="HorizonClientSecurityNTLM" displayName="$(string.HorizonClientSecurityNTLM)">
+      <parentCategory ref="HorizonClientSecurity" />
+    </category>
+    <category name="HorizonClientScripting" displayName="$(string.HorizonClientScripting)">
+      <parentCategory ref="HorizonClient" />
+    </category>
+    <category name="HorizonRdpSettings" displayName="$(string.HorizonRdpSettings)">
+      <parentCategory ref="HorizonClient" />
+    </category>
+    <category name="HorizonBrowserRedirection" displayName="$(string.HorizonBrowserRedirection)">
+      <parentCategory ref="HorizonClient" />
+    </category>
+    <category name="HorizonTelemetry" displayName="$(string.HorizonTelemetry)">
+      <parentCategory ref="HorizonClient" />
+    </category>
+    <category name="HorizonClientNetwork" displayName="$(string.HorizonClientNetwork)">
+      <parentCategory ref="HorizonClient" />
+    </category>
+    <category name="HorizonClientNetworkQuality" displayName="$(string.HorizonClientNetworkQuality)">
+      <parentCategory ref="HorizonClientNetwork" />
+    </category>
+  </categories>
+  <policies>
+    <policy name="DisableTimeZoneForwarding" class="Machine" displayName="$(string.DisableTimeZoneForwarding)" explainText="$(string.DisableTimeZoneForwardingExplain)" presentation="$(presentation.DisableTimeZoneForwarding)" key="Software\Policies\Omnissa\Horizon\Client" valueName="DisableTimeZoneForwarding">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AutomaticInputFocus" class="Machine" displayName="$(string.AutomaticInputFocus)" explainText="$(string.AutomaticInputFocusExplain)" presentation="$(presentation.AutomaticInputFocus)" key="Software\Policies\Omnissa\Horizon\Client" valueName="AutomaticInputFocus">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="TunnelProxyBypass" class="Machine" displayName="$(string.TunnelProxyBypass)" explainText="$(string.TunnelProxyBypassExplain)" presentation="$(presentation.TunnelProxyBypass)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <text id="TunnelProxyBypass" valueName="TunnelProxyBypass" />
+      </elements>
+    </policy>
+    <policy name="HelpURL" class="Machine" displayName="$(string.HelpURL)" explainText="$(string.HelpURLExplain)" presentation="$(presentation.HelpURL)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <text id="HelpURL" valueName="HelpURL" />
+      </elements>
+    </policy>
+    <policy name="AutomaticallyInstallShortcuts" class="Machine" displayName="$(string.AutomaticallyInstallShortcuts)" explainText="$(string.AutomaticallyInstallShortcutsExplain)" presentation="$(presentation.AutomaticallyInstallShortcuts)" key="Software\Policies\Omnissa\Horizon\Client" valueName="AutomaticallyInstallShortcuts">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AutoUpdateAllowed" class="Machine" displayName="$(string.AutoUpdateAllowed)" explainText="$(string.AutoUpdateAllowedExplain)" presentation="$(presentation.AutoUpdateAllowed)" key="Software\Policies\Omnissa\Horizon\Client" valueName="AutoUpdateAllowed">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+	<policy name="DisableOOBE" class="Machine" displayName="$(string.DisableOOBE)" explainText="$(string.DisableOOBEExplain)" presentation="$(presentation.DisableOOBE)" key="Software\Policies\Omnissa\Horizon\Client" valueName="DisableOOBE">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AutoCheckForUpdate" class="Machine" displayName="$(string.AutoCheckForUpdate)" explainText="$(string.AutoCheckForUpdateExplain)" presentation="$(presentation.AutoCheckForUpdate)" key="Software\Policies\Omnissa\Horizon\Client" valueName="AutoCheckForUpdate">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AutoUpdateMessagePopUp" class="Machine" displayName="$(string.AutoUpdateMessagePopUp)" explainText="$(string.AutoUpdateMessagePopUpExplain)" presentation="$(presentation.AutoUpdateMessagePopUp)" key="Software\Policies\Omnissa\Horizon\Client" valueName="AutoUpdateMessagePopUp">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AutoUpdateAllowSkip" class="Machine" displayName="$(string.AutoUpdateAllowSkip)" explainText="$(string.AutoUpdateAllowSkipExplain)" presentation="$(presentation.AutoUpdateAllowSkip)" key="Software\Policies\Omnissa\Horizon\Client" valueName="AutoUpdateAllowSkip">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AutoUpdateURL" class="Machine" displayName="$(string.AutoUpdateURL)" explainText="$(string.AutoUpdateURLExplain)" presentation="$(presentation.AutoUpdateURL)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <text id="AutoUpdateURL" valueName="AutoUpdateURL" />
+      </elements>
+    </policy>
+    <policy name="DisableToastNotifications" class="Machine" displayName="$(string.DisableToastNotifications)" explainText="$(string.DisableToastNotificationsExplain)" presentation="$(presentation.DisableToastNotifications)" key="Software\Policies\Omnissa\Horizon\Client" valueName="DisableToast">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="EnableHomeSiteRedirection" class="Machine" displayName="$(string.EnableHomeSiteRedirection)" explainText="$(string.EnableHomeSiteRedirectionExplain)" presentation="$(presentation.EnableHomeSiteRedirection)" key="Software\Policies\Omnissa\Horizon\Client" valueName="EnableHomeSiteRedirection">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="EnableRelativeMouse" class="Machine" displayName="$(string.EnableRelativeMouse)" explainText="$(string.EnableRelativeMouseExplain)" presentation="$(presentation.EnableRelativeMouse)" key="Software\Policies\Omnissa\Horizon\Client" valueName="EnableRelativeMouse">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="DisableDisconnectMessages" class="Machine" displayName="$(string.DisableDisconnectMessages)" explainText="$(string.DisableDisconnectMessagesExplain)" presentation="$(presentation.DisableDisconnectMessages)" key="Software\Policies\Omnissa\Horizon\Client" valueName="DisableDisconnectMessages">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="DisableServerSessionTimeoutMessage" class="Machine" displayName="$(string.DisableServerSessionTimeOutMessage)" explainText="$(string.DisableServerSessionTimeOutMessageExplain)" presentation="$(presentation.DisableServerSessionTimeOutMessage)" key="Software\Policies\Omnissa\Horizon\Client" valueName="DisableServerSessionTimeOutMessage">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="HideClientAfterLaunchSession" class="Machine" displayName="$(string.HideClientAfterLaunchSession)" explainText="$(string.HideClientAfterLaunchSessionExplain)" presentation="$(presentation.HideClientAfterLaunchSession)" key="Software\Policies\Omnissa\Horizon\Client" valueName="HideClientAfterLaunchSession">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="DisallowClientInformationPassthrough" class="Machine" displayName="$(string.DisallowClientInformationPassthrough)" explainText="$(string.DisallowClientInformationPassthroughExplain)" presentation="$(presentation.DisallowClientInformationPassthrough)" key="Software\Policies\Omnissa\Horizon\Client" valueName="DisallowClientInformationPassthrough">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="BlockMultipleInstances" class="Machine" displayName="$(string.BlockMultipleInstances)" explainText="$(string.BlockMultipleInstancesExplain)" presentation="$(presentation.BlockMultipleInstances)" key="Software\Policies\Omnissa\Horizon\Client" valueName="BlockMultipleInstances">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="ListSmartCardCertsOnly" class="Machine" displayName="$(string.ListSmartCardCertsOnly)" explainText="$(string.ListSmartCardCertsOnlyExplain)" presentation="$(presentation.ListSmartCardCertsOnly)" key="Software\Policies\Omnissa\Horizon\Client\Security" valueName="ListSmartCardCertsOnly">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="ForceFloatingLanguageBarOff" class="Machine" displayName="$(string.ForceFloatingLanguageBarOff)" explainText="$(string.ForceFloatingLanguageBarOffExplain)" presentation="$(presentation.ForceFloatingLanguageBarOff)" key="Software\Policies\Omnissa\Horizon\Client" valueName="ForceFloatingLanguageBarOff">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="ForcePrivateMode" class="Machine" displayName="$(string.ForcePrivateMode)" explainText="$(string.ForcePrivateModeExplain)" presentation="$(presentation.ForcePrivateMode)" key="Software\Policies\Omnissa\Horizon\Client\Security" valueName="ForcePrivateMode">
+      <parentCategory ref="HorizonClientSecurity" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AllowDisplayScaling" class="Machine" displayName="$(string.AllowDisplayScaling)" explainText="$(string.AllowDisplayScalingExplain)" presentation="$(presentation.AllowDisplayScaling)" key="Software\Policies\Omnissa\Horizon\Client" valueName="AllowDisplayScaling">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AutoSyncToggleKeys" class="Machine" displayName="$(string.AutoSyncToggleKeys)" explainText="$(string.AutoSyncToggleKeysExplain)" presentation="$(presentation.AutoSyncToggleKeys)" key="Software\Policies\Omnissa\Horizon\Client" valueName="AutoSyncToggleKeys">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AllowBlastCodec" class="Machine" displayName="$(string.AllowBlastCodec)" explainText="$(string.AllowBlastCodecExplain)" presentation="$(presentation.AllowBlastCodec)" key="Software\Policies\Omnissa\Horizon\Client" valueName="AllowClientBlastCodec">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AllowH264" class="Machine" displayName="$(string.AllowH264)" explainText="$(string.AllowH264Explain)" presentation="$(presentation.AllowH264)" key="Software\Policies\Omnissa\Horizon\Client" valueName="AllowClientH264">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AllowH264YUV444" class="Machine" displayName="$(string.AllowH264YUV444)" explainText="$(string.AllowH264YUV444Explain)" presentation="$(presentation.AllowH264YUV444)" key="Software\Policies\Omnissa\Horizon\Client" valueName="AllowClientH264YUV444">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AllowHEVC" class="Machine" displayName="$(string.AllowHEVC)" explainText="$(string.AllowHEVCExplain)" presentation="$(presentation.AllowHEVC)" key="Software\Policies\Omnissa\Horizon\Client" valueName="AllowClientHEVC">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AllowHEVCYUV444" class="Machine" displayName="$(string.AllowHEVCYUV444)" explainText="$(string.AllowHEVCYUV444Explain)" presentation="$(presentation.AllowHEVCYUV444)" key="Software\Policies\Omnissa\Horizon\Client" valueName="AllowClientHEVCYUV444">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AllowHDR" class="Machine" displayName="$(string.AllowHDR)" explainText="$(string.AllowHDRExplain)" presentation="$(presentation.AllowHDR)" key="Software\Policies\Omnissa\Horizon\Client" valueName="AllowClientHDR">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AllowAV1" class="Machine" displayName="$(string.AllowAV1)" explainText="$(string.AllowAV1Explain)" presentation="$(presentation.AllowAV1)" key="Software\Policies\Omnissa\Horizon\Client" valueName="AllowClientAV1">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="EnableWindowOptimizations" class="Machine" displayName="$(string.EnableWindowOptimizations)" explainText="$(string.EnableWindowOptimizationsExplain)" presentation="$(presentation.EnableWindowOptimizations)" key="Software\Policies\Omnissa\Horizon\Client" valueName="EnableWindowOptimizations">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="DecodeCapsProbingMode" class="Both" displayName="$(string.DecodeCapsProbingMode)" explainText="$(string.DecodeCapsProbingModeExplain)" presentation="$(presentation.DecodeCapsProbingMode)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <enum id="DecodeCapsProbingMode" valueName="DecodeCapsProbingMode">
+          <item displayName="$(string.ProbingMode_NORMAL)">
+            <value>
+              <string>normal</string>
+            </value>
+          </item>
+          <item displayName="$(string.ProbingMode_LEGACY)">
+            <value>
+              <string>legacy</string>
+            </value>
+          </item>
+          <item displayName="$(string.ProbingMode_OFF)">
+            <value>
+              <string>off</string>
+            </value>
+          </item>
+        </enum>
+      </elements>
+    </policy>
+    <policy name="DecoderImageCacheSize" class="Machine" displayName="$(string.DecoderImageCacheSize)" explainText="$(string.DecoderImageCacheSizeExplain)" presentation="$(presentation.DecoderImageCacheSize)" key="Software\Policies\Omnissa\Horizon\Client" valueName="DecoderImageCacheSizeKB">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <decimal id="DecoderImageCacheSize" valueName="DecoderImageCacheSizeKB" required="true" minValue="0" maxValue="2147483647" />
+      </elements>
+    </policy>
+    <policy name="AllowBlastThroughProxy" class="Machine" displayName="$(string.AllowBlastThroughProxy)" explainText="$(string.AllowBlastThroughProxyExplain)" presentation="$(presentation.AllowBlastThroughProxy)" key="Software\Policies\Omnissa\Horizon\Client" valueName="BlastConnectThroughProxy">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="DisableEntitlementFolderFeature" class="Machine" displayName="$(string.DisableEntitlementFolderFeature)" explainText="$(string.DisableEntitlementFolderFeatureExplain)" presentation="$(presentation.DisableEntitlementFolderFeature)" key="Software\Policies\Omnissa\Horizon\Client" valueName="DisableEntitlementFolderFeature">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AllowSplitMksWindow" class="Machine" displayName="$(string.AllowSplitMksWindow)" explainText="$(string.AllowSplitMksWindowExplain)" presentation="$(presentation.AllowSplitMksWindow)" key="Software\Policies\Omnissa\Horizon\Client" valueName="AllowSplitMKSWindow">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="MouseMoveMaxLatencyMsec" class="Machine" displayName="$(string.MouseMoveMaxLatencyMsec)" explainText="$(string.MouseMoveMaxLatencyMsecExplain)" presentation="$(presentation.MouseMoveMaxLatencyMsec)" key="Software\Policies\Omnissa\Horizon\Client" valueName="MouseMoveMaxLatencyMsec">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <decimal id="MouseMoveMaxLatencyMsec" valueName="MouseMoveMaxLatencyMsec" required="true" minValue="0" maxValue="50" />
+      </elements>
+    </policy>
+	<policy name="EnableD3D11" class="Machine" displayName="$(string.EnableD3D11)" explainText="$(string.EnableD3D11Explain)" presentation="$(presentation.EnableD3D11)" key="Software\Policies\Omnissa\Horizon\Client" valueName="EnableD3D11">
+	  <parentCategory ref="HorizonClient" />
+	  <supportedOn ref="SUPPORTED_NotSpecified" />
+	  <enabledValue>
+	    <string>true</string>
+	  </enabledValue>
+	  <disabledValue>
+	    <string>false</string>
+      </disabledValue>
+	</policy>
+	<policy name="SplitExcludeVidPid" class="Machine" displayName="$(string.SplitExcludeVidPid)" explainText="$(string.SplitExcludeVidPidExplain)" presentation="$(presentation.SplitExcludeVidPid)" key="Software\Policies\Omnissa\Horizon\Client\USB">
+      <parentCategory ref="HorizonClientUSB" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <text id="SplitExcludeVidPid" valueName="SplitExcludeVidPid" />
+      </elements>
+    </policy>
+    <policy name="SplitVidPid" class="Machine" displayName="$(string.SplitVidPid)" explainText="$(string.SplitVidPidExplain)" presentation="$(presentation.SplitVidPid)" key="Software\Policies\Omnissa\Horizon\Client\USB">
+      <parentCategory ref="HorizonClientUSB" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <text id="SplitVidPid" valueName="SplitVidPid" />
+      </elements>
+    </policy>
+    <policy name="ExcludeVidPid" class="Machine" displayName="$(string.ExcludeVidPid)" explainText="$(string.ExcludeVidPidExplain)" presentation="$(presentation.ExcludeVidPid)" key="Software\Policies\Omnissa\Horizon\Client\USB">
+      <parentCategory ref="HorizonClientUSB" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <text id="ExcludeVidPid" valueName="ExcludeVidPid" />
+      </elements>
+    </policy>
+    <policy name="ExcludeVidPidRel" class="Machine" displayName="$(string.ExcludeVidPidRel)" explainText="$(string.ExcludeVidPidRelExplain)" presentation="$(presentation.ExcludeVidPidRel)" key="Software\Policies\Omnissa\Horizon\Client\USB">
+      <parentCategory ref="HorizonClientUSB" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <text id="ExcludeVidPidRel" valueName="ExcludeVidPidRel" />
+      </elements>
+    </policy>
+    <policy name="IncludeVidPid" class="Machine" displayName="$(string.IncludeVidPid)" explainText="$(string.IncludeVidPidExplain)" presentation="$(presentation.IncludeVidPid)" key="Software\Policies\Omnissa\Horizon\Client\USB">
+      <parentCategory ref="HorizonClientUSB" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <text id="IncludeVidPid" valueName="IncludeVidPid" />
+      </elements>
+    </policy>
+    <policy name="IncludeVidPidRel" class="Machine" displayName="$(string.IncludeVidPidRel)" explainText="$(string.IncludeVidPidRelExplain)" presentation="$(presentation.IncludeVidPidRel)" key="Software\Policies\Omnissa\Horizon\Client\USB">
+      <parentCategory ref="HorizonClientUSB" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <text id="IncludeVidPidRel" valueName="IncludeVidPidRel" />
+      </elements>
+    </policy>
+    <policy name="ExcludeFamily" class="Machine" displayName="$(string.ExcludeFamily)" explainText="$(string.ExcludeFamilyExplain)" presentation="$(presentation.ExcludeFamily)" key="Software\Policies\Omnissa\Horizon\Client\USB">
+      <parentCategory ref="HorizonClientUSB" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <text id="ExcludeFamily" valueName="ExcludeFamily" />
+      </elements>
+    </policy>
+    <policy name="IncludeFamily" class="Machine" displayName="$(string.IncludeFamily)" explainText="$(string.IncludeFamilyExplain)" presentation="$(presentation.IncludeFamily)" key="Software\Policies\Omnissa\Horizon\Client\USB">
+      <parentCategory ref="HorizonClientUSB" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <text id="IncludeFamily" valueName="IncludeFamily" />
+      </elements>
+    </policy>
+    <policy name="ExAutoRedirectVidPid" class="Machine" displayName="$(string.ExAutoRedirectVidPid)" explainText="$(string.ExAutoRedirectVidPidExplain)" presentation="$(presentation.ExAutoRedirectVidPid)" key="Software\Policies\Omnissa\Horizon\Client\USB">
+      <parentCategory ref="HorizonClientUSB" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <text id="ExAutoRedirectVidPid" valueName="ExAutoRedirectVidPid" />
+      </elements>
+    </policy>
+    <policy name="ExAutoRedirectFamily" class="Machine" displayName="$(string.ExAutoRedirectFamily)" explainText="$(string.ExAutoRedirectFamilyExplain)" presentation="$(presentation.ExAutoRedirectFamily)" key="Software\Policies\Omnissa\Horizon\Client\USB">
+      <parentCategory ref="HorizonClientUSB" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <text id="ExAutoRedirectFamily" valueName="ExAutoRedirectFamily" />
+      </elements>
+    </policy>
+    <policy name="ExcludeAllDevices" class="Machine" displayName="$(string.ExcludeAllDevices)" explainText="$(string.ExcludeAllDevicesExplain)" presentation="$(presentation.ExcludeAllDevices)" key="Software\Policies\Omnissa\Horizon\Client\USB" valueName="ExcludeAllDevices">
+      <parentCategory ref="HorizonClientUSB" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AllowHID" class="Machine" displayName="$(string.AllowHID)" explainText="$(string.AllowHIDExplain)" presentation="$(presentation.AllowHID)" key="Software\Policies\Omnissa\Horizon\Client\USB" valueName="AllowHID">
+      <parentCategory ref="HorizonClientUSB" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AllowHIDBootable" class="Machine" displayName="$(string.AllowHIDBootable)" explainText="$(string.AllowHIDBootableExplain)" presentation="$(presentation.AllowHIDBootable)" key="Software\Policies\Omnissa\Horizon\Client\USB" valueName="AllowHIDBootable">
+      <parentCategory ref="HorizonClientUSB" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AllowAudioIn" class="Machine" displayName="$(string.AllowAudioIn)" explainText="$(string.AllowAudioInExplain)" presentation="$(presentation.AllowAudioIn)" key="Software\Policies\Omnissa\Horizon\Client\USB" valueName="AllowAudioIn">
+      <parentCategory ref="HorizonClientUSB" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AllowAudioOut" class="Machine" displayName="$(string.AllowAudioOut)" explainText="$(string.AllowAudioOutExplain)" presentation="$(presentation.AllowAudioOut)" key="Software\Policies\Omnissa\Horizon\Client\USB" valueName="AllowAudioOut">
+      <parentCategory ref="HorizonClientUSB" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AllowKeyboardMouse" class="Machine" displayName="$(string.AllowKeyboardMouse)" explainText="$(string.AllowKeyboardMouseExplain)" presentation="$(presentation.AllowKeyboardMouse)" key="Software\Policies\Omnissa\Horizon\Client\USB" valueName="AllowKeyboardMouse">
+      <parentCategory ref="HorizonClientUSB" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AllowVideo" class="Machine" displayName="$(string.AllowVideo)" explainText="$(string.AllowVideoExplain)" presentation="$(presentation.AllowVideo)" key="Software\Policies\Omnissa\Horizon\Client\USB" valueName="AllowVideo">
+      <parentCategory ref="HorizonClientUSB" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AllowSmartcard" class="Machine" displayName="$(string.AllowSmartcard)" explainText="$(string.AllowSmartcardExplain)" presentation="$(presentation.AllowSmartcard)" key="Software\Policies\Omnissa\Horizon\Client\USB" valueName="AllowSmartcard">
+      <parentCategory ref="HorizonClientUSB" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AllowAutoDeviceSplitting" class="Machine" displayName="$(string.AllowAutoDeviceSplitting)" explainText="$(string.AllowAutoDeviceSplittingExplain)" presentation="$(presentation.AllowAutoDeviceSplitting)" key="Software\Policies\Omnissa\Horizon\Client\USB" valueName="AllowAutoDeviceSplitting">
+      <parentCategory ref="HorizonClientUSB" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="ExcludePath" class="Machine" displayName="$(string.ExcludePath)" explainText="$(string.ExcludePathExplain)" presentation="$(presentation.ExcludePath)" key="Software\Policies\Omnissa\Horizon\Client\USB">
+      <parentCategory ref="HorizonClientOnlySetting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <text id="ExcludePath" valueName="ExcludePath" />
+      </elements>
+    </policy>
+    <policy name="IncludePath" class="Machine" displayName="$(string.IncludePath)" explainText="$(string.IncludePathExplain)" presentation="$(presentation.IncludePath)" key="Software\Policies\Omnissa\Horizon\Client\USB">
+      <parentCategory ref="HorizonClientOnlySetting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <text id="IncludePath" valueName="IncludePath" />
+      </elements>
+    </policy>
+    <policy name="DisableRemoteConfig" class="Machine" displayName="$(string.DisableRemoteConfig)" explainText="$(string.DisableRemoteConfigExplain)" presentation="$(presentation.DisableRemoteConfig)" key="Software\Policies\Omnissa\Horizon\Client\USB" valueName="DisableRemoteConfig">
+      <parentCategory ref="HorizonClientOnlySetting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AllowDevDescFailsafe" class="Machine" displayName="$(string.AllowDevDescFailsafe)" explainText="$(string.AllowDevDescFailsafeExplain)" presentation="$(presentation.AllowDevDescFailsafe)" key="Software\Policies\Omnissa\Horizon\Client\USB" valueName="AllowDevDescFailsafe">
+      <parentCategory ref="HorizonClientOnlySetting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AzureActiveDirectoryLogin_Display" class="Machine" displayName="$(string.AzureActiveDirectoryLogin_Display)" explainText="$(string.AzureActiveDirectoryLogin_DisplayExplain)" presentation="$(presentation.AzureActiveDirectoryLogin_Display)" key="Software\Policies\Omnissa\Horizon\Client\Security" valueName="AzureActiveDirectoryLogin_Display">
+      <parentCategory ref="HorizonClientSecurity" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AzureActiveDirectoryLogin" class="Machine" displayName="$(string.AzureActiveDirectoryLogin)" explainText="$(string.AzureActiveDirectoryLoginExplain)" presentation="$(presentation.AzureActiveDirectoryLogin)" key="Software\Policies\Omnissa\Horizon\Client\Security" valueName="AzureActiveDirectoryLogin">
+      <parentCategory ref="HorizonClientSecurity" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="LogInAsCurrentUser_Display" class="Machine" displayName="$(string.LogInAsCurrentUser_Display)" explainText="$(string.LogInAsCurrentUser_DisplayExplain)" presentation="$(presentation.LogInAsCurrentUser_Display)" key="Software\Policies\Omnissa\Horizon\Client\Security" valueName="LogInAsCurrentUser_Display">
+      <parentCategory ref="HorizonClientSecurity" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="LogInAsCurrentUser" class="Machine" displayName="$(string.LogInAsCurrentUser)" explainText="$(string.LogInAsCurrentUserExplain)" presentation="$(presentation.LogInAsCurrentUser)" key="Software\Policies\Omnissa\Horizon\Client\Security" valueName="LogInAsCurrentUser">
+      <parentCategory ref="HorizonClientSecurity" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="EnableRecursiveUnlock" class="Machine" displayName="$(string.EnableRecursiveUnlock)" explainText="$(string.EnableRecursiveUnlockExplain)" presentation="$(presentation.EnableRecursiveUnlock)" key="Software\Policies\Omnissa\Horizon\Client\Security" valueName="EnableRecursiveUnlock">
+      <parentCategory ref="HorizonClientSecurity" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="BrokersTrustedForDelegation" class="Machine" displayName="$(string.BrokersTrustedForDelegation)" explainText="$(string.BrokersTrustedForDelegationExplain)" presentation="$(presentation.BrokersTrustedForDelegation)" key="Software\Policies\Omnissa\Horizon\Client\Security\BrokersTrustedForDelegation">
+      <parentCategory ref="HorizonClientSecurity" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <list id="BrokersTrustedForDelegation" valuePrefix="" />
+      </elements>
+    </policy>
+    <policy name="AllowNTLMAuthentication" class="Machine" displayName="$(string.AllowNTLMAuthentication)" explainText="$(string.AllowNTLMAuthenticationExplain)" presentation="$(presentation.AllowNTLMAuthentication)" key="Software\Policies\Omnissa\Horizon\Client\Security\NTLMAuthentication" valueName="AllowNTLMAuthentication">
+      <parentCategory ref="HorizonClientSecurityNTLM" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+      <elements>
+        <enum id="AllowNTLMAuthentication" valueName="AllowKerberosFallBackToNTLM">
+          <item displayName="$(string.AllowFallBack_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.AllowFallBack_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+      </elements>
+    </policy>
+    <policy name="ServersAlwaysUseNTLM" class="Machine" displayName="$(string.ServersAlwaysUseNTLM)" explainText="$(string.ServersAlwaysUseNTLMExplain)" presentation="$(presentation.ServersAlwaysUseNTLM)" key="Software\Policies\Omnissa\Horizon\Client\Security\NTLMAuthentication\ServersAlwaysUseNTLM">
+      <parentCategory ref="HorizonClientSecurityNTLM" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+        <elements>
+          <list id="ServersAlwaysUseNTLM" valuePrefix="" />
+        </elements>
+    </policy>
+    <policy name="DoNotCheckCertRevocationStatus" class="Machine" displayName="$(string.DoNotCheckCertRevocationStatus)" explainText="$(string.DoNotCheckCertRevocationStatusExplain)" presentation="$(presentation.DoNotCheckCertRevocationStatus)" key="Software\Policies\Omnissa\Horizon\Client\Security" valueName="IgnoreRevocation">
+      <parentCategory ref="HorizonClientSecurity" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="StrictCertRevocationCheck" class="Machine" displayName="$(string.StrictCertRevocationCheck)" explainText="$(string.StrictCertRevocationCheckExplain)" presentation="$(presentation.StrictCertRevocationCheck)" key="Software\Policies\Omnissa\Horizon\Client\Security" valueName="StrictCertRevocationCheck">
+      <parentCategory ref="HorizonClientSecurity" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="CertCheckMode" class="Machine" displayName="$(string.CertCheckMode)" explainText="$(string.CertCheckModeExplain)" presentation="$(presentation.CertCheckMode)" key="Software\Policies\Omnissa\Horizon\Client\Security">
+      <parentCategory ref="HorizonClientSecurity" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <enum id="CertCheckMode" valueName="CertCheckMode">
+          <item displayName="$(string.CertCheckMode_NoSecurity)">
+            <value>
+              <string>0</string>
+            </value>
+          </item>
+          <item displayName="$(string.CertCheckMode_WarnButAllow)">
+            <value>
+              <string>1</string>
+            </value>
+          </item>
+          <item displayName="$(string.CertCheckMode_FullSecurity)">
+            <value>
+              <string>2</string>
+            </value>
+          </item>
+        </enum>
+      </elements>
+    </policy>
+    <policy name="ProtocolConnectionCertCheckMode" class="Machine" displayName="$(string.ProtocolConnectionCertCheckMode)" explainText="$(string.ProtocolConnectionCertCheckModeExplain)" presentation="$(presentation.ProtocolConnectionCertCheckMode)" key="Software\Policies\Omnissa\Horizon\Client\Security">
+      <parentCategory ref="HorizonClientSecurity" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <enum id="ProtocolConnectionCertCheckMode" valueName="ProtocolConnectionCertCheckMode">
+          <item displayName="$(string.ProtocolConnectionCertCheckMode_TP)">
+            <value>
+              <string>0</string>
+            </value>
+          </item>
+          <item displayName="$(string.ProtocolConnectionCertCheckMode_TPORPKI)">
+            <value>
+              <string>1</string>
+            </value>
+          </item>
+          <item displayName="$(string.ProtocolConnectionCertCheckMode_PKIANDTP)">
+            <value>
+              <string>2</string>
+            </value>
+          </item>
+          <item displayName="$(string.ProtocolConnectionCertCheckMode_PKI)">
+            <value>
+              <string>3</string>
+            </value>
+          </item>
+        </enum>
+      </elements>
+    </policy>
+    <policy name="EnableSmartCardSSO" class="Machine" displayName="$(string.EnableSmartCardSSO)" explainText="$(string.EnableSmartCardSSOExplain)" presentation="$(presentation.EnableSmartCardSSO)" key="Software\Policies\Omnissa\Horizon\Client\Security" valueName="EnableSmartCardSSO">
+      <parentCategory ref="HorizonClientSecurity" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="EnableJumplist" class="Machine" displayName="$(string.EnableJumplist)" explainText="$(string.EnableJumplistExplain)" presentation="$(presentation.EnableJumplist)" key="Software\Policies\Omnissa\Horizon\Client\Security" valueName="EnableJumplist">
+      <parentCategory ref="HorizonClientSecurity" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AllowCmdLineCredentials" class="Machine" displayName="$(string.AllowCmdLineCredentials)" explainText="$(string.AllowCmdLineCredentialsExplain)" presentation="$(presentation.AllowCmdLineCredentials)" key="Software\Policies\Omnissa\Horizon\Client\Security" valueName="AllowCmdLineCredentials">
+      <parentCategory ref="HorizonClientSecurity" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="EnableTicketSSLAuth" class="Machine" displayName="$(string.EnableTicketSSLAuth)" explainText="$(string.EnableTicketSSLAuthExplain)" presentation="$(presentation.EnableTicketSSLAuth)" key="Software\Policies\Omnissa\Horizon\Client\Security">
+      <parentCategory ref="HorizonClientSecurity" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <enum id="EnableTicketSSLAuth" valueName="EnableTicketSSLAuth" required="true">
+          <item displayName="$(string.EnableTicketSSLAuth_Enable)">
+            <value>
+              <string>1</string>
+            </value>
+          </item>
+          <item displayName="$(string.EnableTicketSSLAuth_Disable)">
+            <value>
+              <string>0</string>
+            </value>
+          </item>
+          <item displayName="$(string.EnableTicketSSLAuth_Enforce)">
+            <value>
+              <string>3</string>
+            </value>
+          </item>
+        </enum>
+      </elements>
+    </policy>
+    <policy name="SSLCipherList" class="Machine" displayName="$(string.SSLCipherList)" explainText="$(string.SSLCipherListExplain)" presentation="$(presentation.SSLCipherList)" key="Software\Policies\Omnissa\Horizon\Client\Security">
+      <parentCategory ref="HorizonClientSecurity" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <boolean id="EnableTLSv11TLSv12" valueName="EnableTLSv11TLSv12">
+           <trueValue>
+             <decimal value="1" />
+           </trueValue>
+           <falseValue>
+             <decimal value="0" />
+           </falseValue>
+        </boolean>
+        <text id="SSLCipherList" valueName="SSLCipherList" />
+        <boolean id="EnableTLSv13" valueName="EnableTLSv13">
+           <trueValue>
+             <decimal value="1" />
+           </trueValue>
+           <falseValue>
+             <decimal value="0" />
+           </falseValue>
+        </boolean>
+        <text id="SSLCipherSuites" valueName="SSLCipherSuites" />
+        <text id="SSLSignatureAlgorithms" valueName="SSLSignatureAlgorithms" />
+        <text id="SSLSupportedGroups" valueName="SSLSupportedGroups" />
+      </elements>
+    </policy>
+    <policy name="DisableWindowsHelloForBusinessCredentials" class="Machine" displayName="$(string.DisableWindowsHelloForBusinessCredentials)" explainText="$(string.DisableWindowsHelloForBusinessCredentialsExplain)" presentation="$(presentation.DisableWindowsHelloForBusinessCredentials)" key="Software\Policies\Omnissa\Horizon\Client\Security" valueName="DisableWindowsHelloForBusinessCredentials">
+      <parentCategory ref="HorizonClientSecurity" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="ServerURL" class="Machine" displayName="$(string.ServerURL)" explainText="$(string.ServerURLExplain)" presentation="$(presentation.ServerURL)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClientScripting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <text id="ServerURL" valueName="ServerURL" />
+        <boolean id="LockServerURL" valueName="LockServerURL">
+           <trueValue>
+             <decimal value="1" />
+           </trueValue>
+           <falseValue>
+             <decimal value="0" />
+           </falseValue>
+        </boolean>
+      </elements>
+    </policy>
+    <policy name="UserName" class="Machine" displayName="$(string.UserName)" explainText="$(string.UserNameExplain)" presentation="$(presentation.UserName)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClientScripting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <text id="UserName" valueName="UserName" />
+      </elements>
+    </policy>
+    <policy name="DomainName" class="Machine" displayName="$(string.DomainName)" explainText="$(string.DomainNameExplain)" presentation="$(presentation.DomainName)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClientScripting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <text id="DomainName" valueName="DomainName" />
+      </elements>
+    </policy>
+    <policy name="Password" class="Machine" displayName="$(string.Password)" explainText="$(string.PasswordExplain)" presentation="$(presentation.Password)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClientScripting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <text id="Password" valueName="Password" />
+      </elements>
+    </policy>
+    <policy name="DesktopName" class="Machine" displayName="$(string.DesktopName)" explainText="$(string.DesktopNameExplain)" presentation="$(presentation.DesktopName)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClientScripting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <text id="DesktopName" valueName="DesktopName" />
+      </elements>
+    </policy>
+    <policy name="DesktopLayout" class="Machine" displayName="$(string.DesktopLayout)" explainText="$(string.DesktopLayoutExplain)" presentation="$(presentation.DesktopLayout)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClientScripting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <enum id="DesktopLayout" valueName="DesktopLayout">
+          <item displayName="$(string.DesktopLayout_FullScreen)">
+            <value>
+              <string>FullScreen</string>
+            </value>
+          </item>
+          <item displayName="$(string.DesktopLayout_WindowLarge)">
+            <value>
+              <string>WindowLarge</string>
+            </value>
+          </item>
+          <item displayName="$(string.DesktopLayout_WindowSmall)">
+            <value>
+              <string>WindowSmall</string>
+            </value>
+          </item>
+          <item displayName="$(string.DesktopLayout_MultiMonitor)">
+            <value>
+              <string>MultiMonitor</string>
+            </value>
+          </item>
+        </enum>
+      </elements>
+    </policy>
+    <policy name="LockedGuestSize" class="Machine" displayName="$(string.LockedGuestSize)" explainText="$(string.LockedGuestSizeExplain)" presentation="$(presentation.LockedGuestSize)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClientScripting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <decimal id="LockedGuestWidth" valueName="LockedGuestWidth" required="true" minValue="640" maxValue="4096" />
+        <decimal id="LockedGuestHeight" valueName="LockedGuestHeight" required="true" minValue="480" maxValue="4096" />
+      </elements>
+    </policy>
+    <policy name="NonInteractive" class="Machine" displayName="$(string.NonInteractive)" explainText="$(string.NonInteractiveExplain)" presentation="$(presentation.NonInteractive)" key="Software\Policies\Omnissa\Horizon\Client" valueName="NonInteractive">
+      <parentCategory ref="HorizonClientScripting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="SingleAutoConnect" class="Machine" displayName="$(string.SingleAutoConnect)" explainText="$(string.SingleAutoConnectExplain)" presentation="$(presentation.SingleAutoConnect)" key="Software\Policies\Omnissa\Horizon\Client" valueName="SingleAutoConnect">
+      <parentCategory ref="HorizonClientScripting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="noTSCAddins" class="Machine" displayName="$(string.noTSCAddins)" explainText="$(string.noTSCAddinsExplain)" presentation="$(presentation.noTSCAddins)" key="Software\Policies\Omnissa\Horizon\Client" valueName="noTSCAddins">
+      <parentCategory ref="HorizonClientScripting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="connectUSBOnStartup" class="Machine" displayName="$(string.connectUSBOnStartup)" explainText="$(string.connectUSBOnStartupExplain)" presentation="$(presentation.connectUSBOnStartup)" key="Software\Policies\Omnissa\Horizon\Client" valueName="connectUSBOnStartup">
+      <parentCategory ref="HorizonClientScripting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="connectUSBOnInsert" class="Machine" displayName="$(string.connectUSBOnInsert)" explainText="$(string.connectUSBOnInsertExplain)" presentation="$(presentation.connectUSBOnInsert)" key="Software\Policies\Omnissa\Horizon\Client" valueName="connectUSBOnInsert">
+      <parentCategory ref="HorizonClientScripting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AppSessionReconnectBehavior" class="Machine" displayName="$(string.AppSessionReconnectBehavior)" explainText="$(string.AppSessionReconnectBehaviorExplain)" presentation="$(presentation.AppSessionReconnectBehavior)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClientScripting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <enum id="AppSessionReconnectBehavior" valueName="AppSessionReconnectBehavior">
+          <item displayName="$(string.AppSessionReconnectBehavior_Ask)">
+            <value>
+              <string>ask</string>
+            </value>
+          </item>
+          <item displayName="$(string.AppSessionReconnectBehavior_Always)">
+            <value>
+              <string>always</string>
+            </value>
+          </item>
+          <item displayName="$(string.AppSessionReconnectBehavior_Never)">
+            <value>
+              <string>never</string>
+            </value>
+          </item>
+        </enum>
+      </elements>
+    </policy>
+    <policy name="AllSessionsDisconnectedBehavior" class="Machine" displayName="$(string.AllSessionsDisconnectedBehavior)" explainText="$(string.AllSessionsDisconnectedBehaviorExplain)" presentation="$(presentation.AllSessionsDisconnectedBehavior)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <enum id="AllSessionsDisconnectedBehavior" valueName="AllSessionsDisconnectedBehavior">
+          <item displayName="$(string.AllSessionsDisconnectedBehavior_Quit)">
+            <value>
+              <string>quit</string>
+            </value>
+          </item>
+          <item displayName="$(string.AllSessionsDisconnectedBehavior_Logoff)">
+            <value>
+              <string>logoff</string>
+            </value>
+          </item>
+          <item displayName="$(string.AllSessionsDisconnectedBehavior_Keep)">
+            <value>
+              <string>keep</string>
+            </value>
+          </item>
+        </enum>
+      </elements>
+    </policy>
+    <policy name="ErrorFooterTextFile" class="Machine" displayName="$(string.CustomErrorScreenFooter)" explainText="$(string.CustomErrorScreenFooterExplain)" presentation="$(presentation.ErrorFooterTextFile)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <text id="ErrorFooterTextFile" valueName="ErrorFooterTextFile" />
+      </elements>
+    </policy>
+    <policy name="UnauthenticatedAccessEnabled" class="Machine" displayName="$(string.UnauthenticatedAccessEnabled)" explainText="$(string.UnauthenticatedAccessEnabledExplain)" presentation="$(presentation.UnauthenticatedAccessEnabled)" key="Software\Policies\Omnissa\Horizon\Client" valueName="UnauthenticatedAccessEnabled">
+      <parentCategory ref="HorizonClientScripting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+        <policy name="ForceUserAffinity" class="Machine" displayName="$(string.ForceUserAffinity)" explainText="$(string.ForceUserAffinityExplain)" presentation="$(presentation.ForceUserAffinity)" key="Software\Policies\Omnissa\Horizon\Client" valueName="ForceUserAffinity">
+      <parentCategory ref="HorizonClientScripting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="UnauthenticatedAccessAccount" class="Machine" displayName="$(string.UnauthenticatedAccessAccount)" explainText="$(string.UnauthenticatedAccessAccountExplain)" presentation="$(presentation.UnauthenticatedAccessAccount)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClientScripting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <text id="UnauthenticatedAccessAccount" valueName="UnauthenticatedAccessAccount" />
+      </elements>
+    </policy>
+    <policy name="AllowDataSharing" class="Machine" displayName="$(string.AllowDataSharing)" explainText="$(string.AllowDataSharingExplain)" presentation="$(presentation.AllowDataSharing)" key="Software\Policies\Omnissa\Horizon\Client" valueName="AllowDataSharing">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AllowPluginUpdate" class="Machine" displayName="$(string.AllowPluginUpdate)" explainText="$(string.AllowPluginUpdateExplain)" presentation="$(presentation.AllowPluginUpdate)" key="Software\Policies\Omnissa\Horizon\Client" valueName="AllowPluginUpdate">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AllowResolutionDpiSync" class="Machine" displayName="$(string.AllowResolutionDpiSync)" explainText="$(string.AllowResolutionDpiSyncExplain)" presentation="$(presentation.AllowResolutionDpiSync)" key="Software\Policies\Omnissa\Horizon\Client" valueName="AllowResolutionDpiSync">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="KeyboardHotkeys" class="Machine" displayName="$(string.KeyboardHotkeys)" explainText="$(string.KeyboardHotkeysExplain)" presentation="$(presentation.KeyboardHotkeys)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <enum id="DisplaySwitchModifierKey" valueName="DisplaySwitchModifierKey">
+          <item displayName="$(string.KEY_NONE)">
+            <value>
+              <string>(none)</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_ALT)">
+            <value>
+              <string>Alt</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_CTRL)">
+            <value>
+              <string>Ctrl</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_SHIFT)">
+            <value>
+              <string>Shift</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="DisplaySwitchFunctionKey" valueName="DisplaySwitchFunctionKey">
+          <item displayName="$(string.KEY_NONE)">
+            <value>
+              <string>(none)</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_F1)">
+            <value>
+              <string>F1</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_F2)">
+            <value>
+              <string>F2</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_F3)">
+            <value>
+              <string>F3</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_F4)">
+            <value>
+              <string>F4</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_F5)">
+            <value>
+              <string>F5</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_F6)">
+            <value>
+              <string>F6</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_F7)">
+            <value>
+              <string>F7</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_F8)">
+            <value>
+              <string>F8</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_F9)">
+            <value>
+              <string>F9</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_F10)">
+            <value>
+              <string>F10</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_F11)">
+            <value>
+              <string>F11</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_F12)">
+            <value>
+              <string>F12</string>
+            </value>
+          </item>
+        </enum>
+      </elements>
+    </policy>
+    <policy name="HotkeyUngrabDesktop" class="Machine" displayName="$(string.HotkeyUngrabDesktop)" explainText="$(string.HotkeyUngrabDesktopExplain)" presentation="$(presentation.HotkeyUngrabDesktop)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+       <enum id="UngrabDesktopModifierKey" valueName="UngrabDesktopModifierKey">
+         <item displayName="$(string.KEY_ALT)">
+         <value>
+           <string>Alt</string>
+         </value>
+         </item>
+         <item displayName="$(string.KEY_CTRL)">
+         <value>
+           <string>Ctrl</string>
+         </value>
+         </item>
+         <item displayName="$(string.KEY_SHIFT)">
+         <value>
+           <string>Shift</string>
+         </value>
+         </item>
+        </enum>
+        <enum id="SecondUngrabDesktopModifierKey" valueName="SecondUngrabDesktopModifierKey">
+          <item displayName="$(string.KEY_SHIFT)">
+            <value>
+              <string>Shift</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_CTRL)">
+            <value>
+              <string>Ctrl</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_ALT)">
+            <value>
+              <string>Alt</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_NONE)">
+            <value>
+              <string>(none)</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="UngrabDesktopFunctionKey" valueName="UngrabDesktopFunctionKey">
+          <item displayName="$(string.KEY_F5)">
+            <value>
+              <string>F5</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_F6)">
+            <value>
+              <string>F6</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_F7)">
+            <value>
+              <string>F7</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_F8)">
+            <value>
+              <string>F8</string>
+            </value>
+          </item>
+        </enum>
+        <boolean id="MinimizeToTaskbar" valueName="MinimizeToTaskbar">
+           <trueValue>
+             <decimal value="1" />
+           </trueValue>
+           <falseValue>
+             <decimal value="0" />
+           </falseValue>
+        </boolean>
+    </elements>
+    </policy>
+    <policy name="HotkeyGrabDesktop" class="Machine" displayName="$(string.HotkeyGrabDesktop)" explainText="$(string.HotkeyGrabDesktopExplain)" presentation="$(presentation.HotkeyGrabDesktop)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+       <enum id="GrabDesktopModifierKey" valueName="GrabDesktopModifierKey">
+          <item displayName="$(string.KEY_CTRL)">
+            <value>
+              <string>Ctrl</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_ALT)">
+            <value>
+              <string>Alt</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_SHIFT)">
+            <value>
+              <string>Shift</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="SecondGrabDesktopModifierKey" valueName="SecondGrabDesktopModifierKey">
+          <item displayName="$(string.KEY_NONE)">
+            <value>
+              <string>(none)</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_CTRL)">
+            <value>
+              <string>Ctrl</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_ALT)">
+            <value>
+              <string>Alt</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_SHIFT)">
+            <value>
+              <string>Shift</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="GrabDesktopFunctionKey" valueName="GrabDesktopLetterKey">
+          <item displayName="$(string.KEY_H)">
+            <value>
+              <string>H</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_I)">
+            <value>
+              <string>I</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_J)">
+            <value>
+              <string>J</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_K)">
+            <value>
+              <string>K</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_L)">
+            <value>
+              <string>L</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_M)">
+            <value>
+              <string>M</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_N)">
+            <value>
+              <string>N</string>
+            </value>
+          </item>
+        </enum>
+    </elements>
+    </policy>
+    <policy name="HideToolBarMenu" class="Machine" displayName="$(string.HideToolBarMenu)" explainText="$(string.HideToolBarMenuExplain)" presentation="$(presentation.HideToolBarMenu)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <enum id="HideFavoritesToolbar" valueName="HideFavoritesToolbar">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="HideSettingsToolbar" valueName="HideSettingsToolbar">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+      </elements>
+    </policy>
+    <policy name="HideDesktopContextMenu" class="Machine" displayName="$(string.HideDesktopContextMenu)" explainText="$(string.HideDesktopContextMenuExplain)" presentation="$(presentation.HideDesktopContextMenu)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <enum id="HideResetDesktopDesktopContext" valueName="HideResetDesktopDesktopContext">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="HideRestartDesktopDesktopContext" valueName="HideRestartDesktopDesktopContext">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="HideDisplayDesktopContext" valueName="HideDisplayDesktopContext">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="HideSettingsDesktopContext" valueName="HideSettingsDesktopContext">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="HideCreateShortcutToDesktopDesktopContext" valueName="HideCreateShortcutToDesktopDesktopContext">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="HideAddToStartMenuDesktopContext" valueName="HideAddToStartMenuDesktopContext">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="HideMarkAsFavoriteDesktopContext" valueName="HideMarkAsFavoriteDesktopContext">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+      </elements>
+    </policy>
+    <policy name="HideAppContextMenu" class="Machine" displayName="$(string.HideAppContextMenu)" explainText="$(string.HideAppContextMenuExplain)" presentation="$(presentation.HideAppContextMenu)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <enum id="HideSettingsAppContext" valueName="HideSettingsAppContext">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="HideCreateShortcutToDesktopAppContext" valueName="HideCreateShortcutToDesktopAppContext">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="HideAddToStartMenuAppContext" valueName="HideAddToStartMenuAppContext">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="HideMarkAsFavoriteAppContext" valueName="HideMarkAsFavoriteAppContext">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+      </elements>
+    </policy>
+    <policy name="HideDesktopMenu" class="Machine" displayName="$(string.HideDesktopMenu)" explainText="$(string.HideDesktopMenuExplain)" presentation="$(presentation.HideDesktopMenu)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <enum id="HideHelpDesktopMenu" valueName="HideHelpDesktopMenu">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="HideSettingsDesktopMenu" valueName="HideSettingsDesktopMenu">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="HideResetDesktopDesktopMenu" valueName="HideResetDesktopDesktopMenu">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="HideRestartDesktopDesktopMenu" valueName="HideRestartDesktopDesktopMenu">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="HideConnectUSBDeviceDesktopMenu" valueName="HideConnectUSBDeviceDesktopMenu">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+      </elements>
+    </policy>
+    <policy name="AllowBlastDynamicPath" class="Machine" displayName="$(string.AllowBlastDynamicPath)" explainText="$(string.AllowBlastDynamicPathExplain)" presentation="$(presentation.AllowBlastDynamicPath)" key="Software\Policies\Omnissa\Horizon\Client" valueName="AllowBlastDynamicPath">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="HideNotificationMenu_1" class="User" displayName="$(string.HideNotificationMenu)" explainText="$(string.HideNotificationMenuExplain)" presentation="$(presentation.HideNotificationMenu)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <enum id="HideSettingsNotificationMenu" valueName="HideSettingsNotificationMenu">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+      </elements>
+    </policy>
+    <policy name="HideNotificationMenu" class="Machine" displayName="$(string.HideNotificationMenu)" explainText="$(string.HideNotificationMenuExplain)" presentation="$(presentation.HideNotificationMenu)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <enum id="HideSettingsNotificationMenu" valueName="HideSettingsNotificationMenu">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+      </elements>
+    </policy>
+    <policy name="EnableShade" class="User" displayName="$(string.EnableShade)" explainText="$(string.EnableShadeExplain)" presentation="$(presentation.EnableShade)" key="Software\Policies\Omnissa\Horizon\Client" valueName="EnableShade">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AutomaticInputFocus_1" class="User" displayName="$(string.AutomaticInputFocus)" explainText="$(string.AutomaticInputFocusExplain)" presentation="$(presentation.AutomaticInputFocus)" key="Software\Policies\Omnissa\Horizon\Client" valueName="AutomaticInputFocus">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="InitialPinState" class="User" displayName="$(string.InitialPinState)" explainText="$(string.InitialPinStateExplain)" presentation="$(presentation.InitialPinState)" key="Software\Policies\Omnissa\Horizon\Client" valueName="InitialPinState">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="DisableSpanChecks" class="User" displayName="$(string.DisableSpanChecks)" explainText="$(string.DisableSpanChecksExplain)" presentation="$(presentation.DisableSpanChecks)" key="Software\Policies\Omnissa\Horizon\Client" valueName="DisableSpanChecks">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="EnableMMR" class="User" displayName="$(string.EnableMMR)" explainText="$(string.EnableMMRExplain)" presentation="$(presentation.EnableMMR)" key="Software\Policies\Omnissa\Horizon\Client" valueName="EnableMMR">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AlwaysOnTop" class="User" displayName="$(string.AlwaysOnTop)" explainText="$(string.AlwaysOnTopExplain)" presentation="$(presentation.AlwaysOnTop)" key="Software\Policies\Omnissa\Horizon\Client" valueName="AlwaysOnTop">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AutomaticallyInstallShortcuts_1" class="User" displayName="$(string.AutomaticallyInstallShortcuts)" explainText="$(string.AutomaticallyInstallShortcutsExplain)" presentation="$(presentation.AutomaticallyInstallShortcuts_1)" key="Software\Policies\Omnissa\Horizon\Client" valueName="AutomaticallyInstallShortcuts">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="DisableToastNotifications_1" class="User" displayName="$(string.DisableToastNotifications)" explainText="$(string.DisableToastNotificationsExplain)" presentation="$(presentation.DisableToastNotifications_1)" key="Software\Policies\Omnissa\Horizon\Client" valueName="DisableToast">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="EnableHomeSiteRedirection_1" class="User" displayName="$(string.EnableHomeSiteRedirection)" explainText="$(string.EnableHomeSiteRedirectionExplain)" presentation="$(presentation.EnableHomeSiteRedirection_1)" key="Software\Policies\Omnissa\Horizon\Client" valueName="EnableHomeSiteRedirection">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+     </policy>
+    <policy name="EnableRelativeMouse_1" class="User" displayName="$(string.EnableRelativeMouse)" explainText="$(string.EnableRelativeMouseExplain)" presentation="$(presentation.EnableRelativeMouse_1)" key="Software\Policies\Omnissa\Horizon\Client" valueName="EnableRelativeMouse">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="DisableDisconnectMessages_1" class="User" displayName="$(string.DisableDisconnectMessages)" explainText="$(string.DisableDisconnectMessagesExplain)" presentation="$(presentation.DisableDisconnectMessages_1)" key="Software\Policies\Omnissa\Horizon\Client" valueName="DisableDisconnectMessages">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="DisableEntitlementFolderFeature_1" class="User" displayName="$(string.DisableEntitlementFolderFeature)" explainText="$(string.DisableEntitlementFolderFeatureExplain)" presentation="$(presentation.DisableEntitlementFolderFeature)" key="Software\Policies\Omnissa\Horizon\Client" valueName="DisableEntitlementFolderFeature">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="DisableServerSessionTimeOutMessage_1" class="User" displayName="$(string.DisableServerSessionTimeOutMessage)" explainText="$(string.DisableServerSessionTimeOutMessageExplain)" presentation="$(presentation.DisableServerSessionTimeOutMessage_1)" key="Software\Policies\Omnissa\Horizon\Client" valueName="DisableServerSessionTimeOutMessage">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="HideClientAfterLaunchSession_1" class="User" displayName="$(string.HideClientAfterLaunchSession)" explainText="$(string.HideClientAfterLaunchSessionExplain)" presentation="$(presentation.HideClientAfterLaunchSession_1)" key="Software\Policies\Omnissa\Horizon\Client" valueName="HideClientAfterLaunchSession">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="DisableSharing" class="User" displayName="$(string.DisableSharing)" explainText="$(string.DisableSharingExplain)" presentation="$(presentation.DisableSharing)" key="Software\Policies\Omnissa\Horizon\Client" valueName="DisableSharing">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="ForceFloatingLanguageBarOff_1" class="User" displayName="$(string.ForceFloatingLanguageBarOff)" explainText="$(string.ForceFloatingLanguageBarOffExplain)" presentation="$(presentation.ForceFloatingLanguageBarOff_1)" key="Software\Policies\Omnissa\Horizon\Client" valueName="ForceFloatingLanguageBarOff">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="DisableFileRedirection" class="User" displayName="$(string.DisableFileRedirection)" explainText="$(string.DisableFileRedirectionExplain)" presentation="$(presentation.DisableFileRedirection)" key="Software\Policies\Omnissa\Horizon\Client" valueName="DisableFileRedirection">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AllowDisplayScaling_1" class="User" displayName="$(string.AllowDisplayScaling)" explainText="$(string.AllowDisplayScalingExplain)" presentation="$(presentation.AllowDisplayScaling)" key="Software\Policies\Omnissa\Horizon\Client" valueName="AllowDisplayScaling">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AllowPluginUpdate_1" class="User" displayName="$(string.AllowPluginUpdate)" explainText="$(string.AllowPluginUpdateExplain)" presentation="$(presentation.AllowPluginUpdate)" key="Software\Policies\Omnissa\Horizon\Client" valueName="AllowPluginUpdate">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="KeyboardHotkeys_1" class="User" displayName="$(string.KeyboardHotkeys)" explainText="$(string.KeyboardHotkeysExplain)" presentation="$(presentation.KeyboardHotkeys)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <enum id="DisplaySwitchModifierKey" valueName="DisplaySwitchModifierKey">
+          <item displayName="$(string.KEY_NONE)">
+            <value>
+              <string>(none)</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_ALT)">
+            <value>
+              <string>Alt</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_CTRL)">
+            <value>
+              <string>Ctrl</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_SHIFT)">
+            <value>
+              <string>Shift</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="DisplaySwitchFunctionKey" valueName="DisplaySwitchFunctionKey">
+          <item displayName="$(string.KEY_NONE)">
+            <value>
+              <string>(none)</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_F1)">
+            <value>
+              <string>F1</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_F2)">
+            <value>
+              <string>F2</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_F3)">
+            <value>
+              <string>F3</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_F4)">
+            <value>
+              <string>F4</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_F5)">
+            <value>
+              <string>F5</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_F6)">
+            <value>
+              <string>F6</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_F7)">
+            <value>
+              <string>F7</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_F8)">
+            <value>
+              <string>F8</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_F9)">
+            <value>
+              <string>F9</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_F10)">
+            <value>
+              <string>F10</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_F11)">
+            <value>
+              <string>F11</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_F12)">
+            <value>
+              <string>F12</string>
+            </value>
+          </item>
+        </enum>
+      </elements>
+    </policy>
+    <policy name="HotkeyUngrabDesktop_1" class="User" displayName="$(string.HotkeyUngrabDesktop)" explainText="$(string.HotkeyUngrabDesktopExplain)" presentation="$(presentation.HotkeyUngrabDesktop)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <enum id="UngrabDesktopModifierKey" valueName="UngrabDesktopModifierKey">
+          <item displayName="$(string.KEY_CTRL)">
+            <value>
+              <string>Ctrl</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_ALT)">
+            <value>
+              <string>Alt</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_SHIFT)">
+            <value>
+              <string>Shift</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="SecondUngrabDesktopModifierKey" valueName="SecondUngrabDesktopModifierKey">
+          <item displayName="$(string.KEY_NONE)">
+            <value>
+              <string>(none)</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_CTRL)">
+            <value>
+              <string>Ctrl</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_ALT)">
+            <value>
+              <string>Alt</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_SHIFT)">
+            <value>
+              <string>Shift</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="UngrabDesktopFunctionKey" valueName="UngrabDesktopFunctionKey">
+          <item displayName="$(string.KEY_F5)">
+            <value>
+              <string>F5</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_F6)">
+            <value>
+              <string>F6</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_F7)">
+            <value>
+              <string>F7</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_F8)">
+            <value>
+              <string>F8</string>
+            </value>
+          </item>
+        </enum>
+        <boolean id="MinimizeToTaskbar" valueName="MinimizeToTaskbar">
+           <trueValue>
+             <decimal value="1" />
+           </trueValue>
+           <falseValue>
+             <decimal value="0" />
+           </falseValue>
+        </boolean>
+      </elements>
+    </policy>
+    <policy name="HotkeyGrabDesktop_1" class="User" displayName="$(string.HotkeyGrabDesktop)" explainText="$(string.HotkeyGrabDesktopExplain)" presentation="$(presentation.HotkeyGrabDesktop)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+       <enum id="GrabDesktopModifierKey" valueName="GrabDesktopModifierKey">
+          <item displayName="$(string.KEY_CTRL)">
+            <value>
+              <string>Ctrl</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_ALT)">
+            <value>
+              <string>Alt</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_SHIFT)">
+            <value>
+              <string>Shift</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="SecondGrabDesktopModifierKey" valueName="SecondGrabDesktopModifierKey">
+          <item displayName="$(string.KEY_NONE)">
+            <value>
+              <string>(none)</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_CTRL)">
+            <value>
+              <string>Ctrl</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_ALT)">
+            <value>
+              <string>Alt</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_SHIFT)">
+            <value>
+              <string>Shift</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="GrabDesktopFunctionKey" valueName="GrabDesktopLetterKey">
+          <item displayName="$(string.KEY_H)">
+            <value>
+              <string>H</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_I)">
+            <value>
+              <string>I</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_J)">
+            <value>
+              <string>J</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_K)">
+            <value>
+              <string>K</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_L)">
+            <value>
+              <string>L</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_M)">
+            <value>
+              <string>M</string>
+            </value>
+          </item>
+          <item displayName="$(string.KEY_N)">
+            <value>
+              <string>N</string>
+            </value>
+          </item>
+        </enum>
+    </elements>
+    </policy>
+    <policy name="HideToolBarMenu_1" class="User" displayName="$(string.HideToolBarMenu)" explainText="$(string.HideToolBarMenuExplain)" presentation="$(presentation.HideToolBarMenu)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <enum id="HideFavoritesToolbar" valueName="HideFavoritesToolbar">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="HideSettingsToolbar" valueName="HideSettingsToolbar">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+      </elements>
+    </policy>
+    <policy name="HideDesktopContextMenu_1" class="User" displayName="$(string.HideDesktopContextMenu)" explainText="$(string.HideDesktopContextMenuExplain)" presentation="$(presentation.HideDesktopContextMenu)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <enum id="HideResetDesktopDesktopContext" valueName="HideResetDesktopDesktopContext">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="HideRestartDesktopDesktopContext" valueName="HideRestartDesktopDesktopContext">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="HideDisplayDesktopContext" valueName="HideDisplayDesktopContext">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="HideSettingsDesktopContext" valueName="HideSettingsDesktopContext">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="HideCreateShortcutToDesktopDesktopContext" valueName="HideCreateShortcutToDesktopDesktopContext">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="HideAddToStartMenuDesktopContext" valueName="HideAddToStartMenuDesktopContext">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="HideMarkAsFavoriteDesktopContext" valueName="HideMarkAsFavoriteDesktopContext">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+      </elements>
+    </policy>
+    <policy name="HideAppContextMenu_1" class="User" displayName="$(string.HideAppContextMenu)" explainText="$(string.HideAppContextMenuExplain)" presentation="$(presentation.HideAppContextMenu)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <enum id="HideSettingsAppContext" valueName="HideSettingsAppContext">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="HideCreateShortcutToDesktopAppContext" valueName="HideCreateShortcutToDesktopAppContext">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="HideAddToStartMenuAppContext" valueName="HideAddToStartMenuAppContext">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="HideMarkAsFavoriteAppContext" valueName="HideMarkAsFavoriteAppContext">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+      </elements>
+    </policy>
+    <policy name="HideDesktopMenu_1" class="User" displayName="$(string.HideDesktopMenu)" explainText="$(string.HideDesktopMenuExplain)" presentation="$(presentation.HideDesktopMenu)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <enum id="HideHelpDesktopMenu" valueName="HideHelpDesktopMenu">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="HideSettingsDesktopMenu" valueName="HideSettingsDesktopMenu">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="HideResetDesktopDesktopMenu" valueName="HideResetDesktopDesktopMenu">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="HideRestartDesktopDesktopMenu" valueName="HideRestartDesktopDesktopMenu">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+        <enum id="HideConnectUSBDeviceDesktopMenu" valueName="HideConnectUSBDeviceDesktopMenu">
+          <item displayName="$(string.HIDE_MENU_YES)">
+            <value>
+              <string>true</string>
+            </value>
+          </item>
+          <item displayName="$(string.HIDE_MENU_NO)">
+            <value>
+              <string>false</string>
+            </value>
+          </item>
+        </enum>
+      </elements>
+    </policy>
+    <policy name="DisableClientIdleTimeOutMessage" class="Machine" displayName="$(string.DisableClientIdleTimeOutMessage)" explainText="$(string.DisableClientIdleTimeOutMessageExplain)" presentation="$(presentation.DisableClientIdleTimeOutMessage)" key="Software\Policies\Omnissa\Horizon\Client" valueName="DisableClientIdleTimeOutMessage">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="DisableClientIdleTimeOutMessage_1" class="User" displayName="$(string.DisableClientIdleTimeOutMessage)" explainText="$(string.DisableClientIdleTimeOutMessageExplain)" presentation="$(presentation.DisableClientIdleTimeOutMessage)" key="Software\Policies\Omnissa\Horizon\Client" valueName="DisableClientIdleTimeOutMessage">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="ColorDepth" class="User" displayName="$(string.ColorDepth)" explainText="$(string.ColorDepthExplain)" presentation="$(presentation.ColorDepth)" key="Software\Policies\Omnissa\Horizon\Client\RDP Settings">
+      <parentCategory ref="HorizonRdpSettings" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <enum id="ColorDepth" valueName="ColorDepth" required="true">
+          <item displayName="$(string.ColorDepth_8bit)">
+            <value>
+              <decimal value="8" />
+            </value>
+          </item>
+          <item displayName="$(string.ColorDepth_15bit)">
+            <value>
+              <decimal value="15" />
+            </value>
+          </item>
+          <item displayName="$(string.ColorDepth_16bit)">
+            <value>
+              <decimal value="16" />
+            </value>
+          </item>
+          <item displayName="$(string.ColorDepth_24bit)">
+            <value>
+              <decimal value="24" />
+            </value>
+          </item>
+          <item displayName="$(string.ColorDepth_32bit)">
+            <value>
+              <decimal value="32" />
+            </value>
+          </item>
+        </enum>
+      </elements>
+    </policy>
+    <policy name="DisableWallpaper" class="User" displayName="$(string.DisableWallpaper)" explainText="$(string.DisableWallpaperExplain)" presentation="$(presentation.DisableWallpaper)" key="Software\Policies\Omnissa\Horizon\Client\RDP Settings" valueName="DisableWallpaper">
+      <parentCategory ref="HorizonRdpSettings" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>false</string>
+      </enabledValue>
+      <disabledValue>
+        <string>true</string>
+      </disabledValue>
+    </policy>
+    <policy name="DisableFullWindowDrag" class="User" displayName="$(string.DisableFullWindowDrag)" explainText="$(string.DisableFullWindowDragExplain)" presentation="$(presentation.DisableFullWindowDrag)" key="Software\Policies\Omnissa\Horizon\Client\RDP Settings" valueName="DisableFullWindowDrag">
+      <parentCategory ref="HorizonRdpSettings" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>false</string>
+      </enabledValue>
+      <disabledValue>
+        <string>true</string>
+      </disabledValue>
+    </policy>
+    <policy name="DisableMenuAnimations" class="User" displayName="$(string.DisableMenuAnimations)" explainText="$(string.DisableMenuAnimationsExplain)" presentation="$(presentation.DisableMenuAnimations)" key="Software\Policies\Omnissa\Horizon\Client\RDP Settings" valueName="DisableMenuAnimations">
+      <parentCategory ref="HorizonRdpSettings" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>false</string>
+      </enabledValue>
+      <disabledValue>
+        <string>true</string>
+      </disabledValue>
+    </policy>
+    <policy name="DisableTheming" class="User" displayName="$(string.DisableTheming)" explainText="$(string.DisableThemingExplain)" presentation="$(presentation.DisableTheming)" key="Software\Policies\Omnissa\Horizon\Client\RDP Settings" valueName="DisableTheming">
+      <parentCategory ref="HorizonRdpSettings" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>false</string>
+      </enabledValue>
+      <disabledValue>
+        <string>true</string>
+      </disabledValue>
+    </policy>
+    <policy name="DisableCursorShadow" class="User" displayName="$(string.DisableCursorShadow)" explainText="$(string.DisableCursorShadowExplain)" presentation="$(presentation.DisableCursorShadow)" key="Software\Policies\Omnissa\Horizon\Client\RDP Settings" valueName="DisableCursorShadow">
+      <parentCategory ref="HorizonRdpSettings" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>false</string>
+      </enabledValue>
+      <disabledValue>
+        <string>true</string>
+      </disabledValue>
+    </policy>
+    <policy name="FontSmoothing" class="User" displayName="$(string.FontSmoothing)" explainText="$(string.FontSmoothingExplain)" presentation="$(presentation.FontSmoothing)" key="Software\Policies\Omnissa\Horizon\Client\RDP Settings" valueName="FontSmoothing">
+      <parentCategory ref="HorizonRdpSettings" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="DesktopComposition" class="User" displayName="$(string.DesktopComposition)" explainText="$(string.DesktopCompositionExplain)" presentation="$(presentation.DesktopComposition)" key="Software\Policies\Omnissa\Horizon\Client\RDP Settings" valueName="DesktopComposition">
+      <parentCategory ref="HorizonRdpSettings" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AudioRedirectionMode" class="User" displayName="$(string.AudioRedirectionMode)" explainText="$(string.AudioRedirectionModeExplain)" presentation="$(presentation.AudioRedirectionMode)" key="Software\Policies\Omnissa\Horizon\Client\RDP Settings" valueName="AudioRedirectionEnable">
+      <parentCategory ref="HorizonRdpSettings" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+      <elements>
+        <enum id="AudioRedirectionMode" valueName="AudioRedirectionMode" required="true">
+          <item displayName="$(string.AudioRedirectionMode_PlayInVM)">
+            <value>
+              <decimal value="1" />
+            </value>
+          </item>
+          <item displayName="$(string.AudioRedirectionMode_RedirectToClient)">
+            <value>
+              <decimal value="0" />
+            </value>
+          </item>
+          <item displayName="$(string.AudioRedirectionMode_DisableAudio)">
+            <value>
+              <decimal value="2" />
+            </value>
+          </item>
+        </enum>
+      </elements>
+    </policy>
+    <policy name="RedirectDrives" class="User" displayName="$(string.RedirectDrives)" explainText="$(string.RedirectDrivesExplain)" presentation="$(presentation.RedirectDrives)" key="Software\Policies\Omnissa\Horizon\Client\RDP Settings" valueName="RedirectDrives">
+      <parentCategory ref="HorizonRdpSettings" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="RedirectPrinters" class="User" displayName="$(string.RedirectPrinters)" explainText="$(string.RedirectPrintersExplain)" presentation="$(presentation.RedirectPrinters)" key="Software\Policies\Omnissa\Horizon\Client\RDP Settings" valueName="RedirectPrinters">
+      <parentCategory ref="HorizonRdpSettings" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="RedirectPorts" class="User" displayName="$(string.RedirectPorts)" explainText="$(string.RedirectPortsExplain)" presentation="$(presentation.RedirectPorts)" key="Software\Policies\Omnissa\Horizon\Client\RDP Settings" valueName="RedirectPorts">
+      <parentCategory ref="HorizonRdpSettings" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="RedirectSmartcards" class="User" displayName="$(string.RedirectSmartcards)" explainText="$(string.RedirectSmartcardsExplain)" presentation="$(presentation.RedirectSmartcards)" key="Software\Policies\Omnissa\Horizon\Client\RDP Settings" valueName="RedirectSmartcards">
+      <parentCategory ref="HorizonRdpSettings" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="RedirectClipboard" class="User" displayName="$(string.RedirectClipboard)" explainText="$(string.RedirectClipboardExplain)" presentation="$(presentation.RedirectClipboard)" key="Software\Policies\Omnissa\Horizon\Client\RDP Settings" valueName="RedirectClipboard">
+      <parentCategory ref="HorizonRdpSettings" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="RedirectPlugAndPlayDevices" class="User" displayName="$(string.RedirectPlugAndPlayDevices)" explainText="$(string.ExplainRedirectPlugAndPlayDevices)" presentation="$(presentation.RedirectPlugAndPlayDevices)" key="Software\Policies\Omnissa\Horizon\Client\RDP Settings" valueName="RedirectPlugAndPlayDevices">
+      <parentCategory ref="HorizonRdpSettings" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="ShadowBitmap" class="User" displayName="$(string.ShadowBitmap)" explainText="$(string.ShadowBitmapExplain)" presentation="$(presentation.ShadowBitmap)" key="Software\Policies\Omnissa\Horizon\Client\RDP Settings" valueName="ShadowBitmap">
+      <parentCategory ref="HorizonRdpSettings" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="CachePersistenceActive" class="User" displayName="$(string.CachePersistenceActive)" explainText="$(string.CachePersistenceActiveExplain)" presentation="$(presentation.CachePersistenceActive)" key="Software\Policies\Omnissa\Horizon\Client\RDP Settings" valueName="CachePersistenceActive">
+      <parentCategory ref="HorizonRdpSettings" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="EnableCompression" class="User" displayName="$(string.EnableCompression)" explainText="$(string.EnableCompressionExplain)" presentation="$(presentation.EnableCompression)" key="Software\Policies\Omnissa\Horizon\Client\RDP Settings" valueName="EnableCompression">
+      <parentCategory ref="HorizonRdpSettings" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="KeyboardHookMode" class="User" displayName="$(string.KeyboardHookMode)" explainText="$(string.KeyboardHookModeExplain)" presentation="$(presentation.KeyboardHookMode)" key="Software\Policies\Omnissa\Horizon\Client\RDP Settings">
+      <parentCategory ref="HorizonRdpSettings" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <enum id="KeyboardHookMode" valueName="KeyboardHookMode" required="true">
+          <item displayName="$(string.KeyboardHookMode_ApplyKeyCombinationsLocal)">
+            <value>
+              <decimal value="0" />
+            </value>
+          </item>
+          <item displayName="$(string.KeyboardHookMode_SendKeyCombinationsToVM)">
+            <value>
+              <decimal value="1" />
+            </value>
+          </item>
+        </enum>
+      </elements>
+    </policy>
+    <policy name="EnableCredSspSupport" class="User" displayName="$(string.EnableCredSspSupport)" explainText="$(string.EnableCredSspSupportExplain)" presentation="$(presentation.EnableCredSspSupport)" key="Software\Policies\Omnissa\Horizon\Client\RDP Settings" valueName="EnableCredSspSupport">
+      <parentCategory ref="HorizonRdpSettings" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="BitmapCacheSize" class="User" displayName="$(string.BitmapCacheSize)" explainText="$(string.BitmapCacheSizeExplain)" presentation="$(presentation.BitmapCacheSize)" key="Software\Policies\Omnissa\Horizon\Client\RDP Settings">
+      <parentCategory ref="HorizonRdpSettings" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <decimal id="BitmapCacheSize" valueName="BitmapCacheSize" required="true" minValue="1" maxValue="32" />
+      </elements>
+    </policy>
+    <policy name="BitmapVirtualCacheSize" class="User" displayName="$(string.BitmapVirtualCacheSize)" explainText="$(string.BitmapVirtualCacheSizeExplain)" presentation="$(presentation.BitmapVirtualCacheSize)" key="Software\Policies\Omnissa\Horizon\Client\RDP Settings">
+      <parentCategory ref="HorizonRdpSettings" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <decimal id="BitmapVirtualCacheSize" valueName="BitmapVirtualCacheSize" required="true" minValue="1" maxValue="32" />
+      </elements>
+    </policy>
+    <policy name="BitmapVirtualCache16BppSize" class="User" displayName="$(string.BitmapVirtualCache16BppSize)" explainText="$(string.BitmapVirtualCache16BppSizeExplain)" presentation="$(presentation.BitmapVirtualCache16BppSize)" key="Software\Policies\Omnissa\Horizon\Client\RDP Settings">
+      <parentCategory ref="HorizonRdpSettings" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <decimal id="BitmapVirtualCache16BppSize" valueName="BitmapVirtualCache16BppSize" required="true" minValue="1" maxValue="32" />
+      </elements>
+    </policy>
+    <policy name="BitmapVirtualCache24BppSize" class="User" displayName="$(string.BitmapVirtualCache24BppSize)" explainText="$(string.BitmapVirtualCache24BppSizeExplain)" presentation="$(presentation.BitmapVirtualCache24BppSize)" key="Software\Policies\Omnissa\Horizon\Client\RDP Settings">
+      <parentCategory ref="HorizonRdpSettings" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <decimal id="BitmapVirtualCache24BppSize" valueName="BitmapVirtualCache24BppSize" required="true" minValue="1" maxValue="32" />
+      </elements>
+    </policy>
+    <policy name="BitmapVirtualCache32BppSize" class="User" displayName="$(string.BitmapVirtualCache32BppSize)" explainText="$(string.BitmapVirtualCache32BppSizeExplain)" presentation="$(presentation.BitmapVirtualCache32BppSize)" key="Software\Policies\Omnissa\Horizon\Client\RDP Settings">
+      <parentCategory ref="HorizonRdpSettings" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <decimal id="BitmapVirtualCache32BppSize" valueName="BitmapVirtualCache32BppSize" required="true" minValue="1" maxValue="32" />
+      </elements>
+    </policy>
+    <policy name="EnableAutoReconnect" class="User" displayName="$(string.EnableAutoReconnect)" explainText="$(string.EnableAutoReconnectExplain)" presentation="$(presentation.EnableAutoReconnect)" key="Software\Policies\Omnissa\Horizon\Client\RDP Settings" valueName="EnableAutoReconnect">
+      <parentCategory ref="HorizonRdpSettings" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="RedirectAudioCapture" class="User" displayName="$(string.RedirectAudioCapture)" explainText="$(string.RedirectAudioCaptureExplain)" presentation="$(presentation.RedirectAudioCapture)" key="Software\Policies\Omnissa\Horizon\Client\RDP Settings" valueName="RedirectAudioCapture">
+      <parentCategory ref="HorizonRdpSettings" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="LogInAsCurrentUser_Display_1" class="User" displayName="$(string.LogInAsCurrentUser_Display)" explainText="$(string.LogInAsCurrentUser_DisplayExplain)" presentation="$(presentation.LogInAsCurrentUser_Display_1)" key="Software\Policies\Omnissa\Horizon\Client\Security" valueName="LogInAsCurrentUser_Display">
+      <parentCategory ref="HorizonClientSecurity" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="LogInAsCurrentUser_1" class="User" displayName="$(string.LogInAsCurrentUser)" explainText="$(string.LogInAsCurrentUserExplain)" presentation="$(presentation.LogInAsCurrentUser_1)" key="Software\Policies\Omnissa\Horizon\Client\Security" valueName="LogInAsCurrentUser">
+      <parentCategory ref="HorizonClientSecurity" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="DisableWindowsHelloForBusinessCredentials_1" class="User" displayName="$(string.DisableWindowsHelloForBusinessCredentials)" explainText="$(string.DisableWindowsHelloForBusinessCredentialsExplain)" presentation="$(presentation.DisableWindowsHelloForBusinessCredentials_1)" key="Software\Policies\Omnissa\Horizon\Client\Security" valueName="DisableWindowsHelloForBusinessCredentials">
+      <parentCategory ref="HorizonClientSecurity" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="EnableRecursiveUnlock_1" class="User" displayName="$(string.EnableRecursiveUnlock)" explainText="$(string.EnableRecursiveUnlockExplain)" presentation="$(presentation.EnableRecursiveUnlock_1)" key="Software\Policies\Omnissa\Horizon\Client\Security" valueName="EnableRecursiveUnlock">
+      <parentCategory ref="HorizonClientSecurity" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="EnableTicketSSLAuth_1" class="User" displayName="$(string.EnableTicketSSLAuth)" explainText="$(string.EnableTicketSSLAuthExplain)" presentation="$(presentation.EnableTicketSSLAuth_1)" key="Software\Policies\Omnissa\Horizon\Client\Security">
+      <parentCategory ref="HorizonClientSecurity" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <enum id="EnableTicketSSLAuth" valueName="EnableTicketSSLAuth" required="true">
+          <item displayName="$(string.EnableTicketSSLAuth_Enable)">
+            <value>
+              <string>1</string>
+            </value>
+          </item>
+          <item displayName="$(string.EnableTicketSSLAuth_Disable)">
+            <value>
+              <string>0</string>
+            </value>
+          </item>
+          <item displayName="$(string.EnableTicketSSLAuth_Enforce)">
+            <value>
+              <string>3</string>
+            </value>
+          </item>
+        </enum>
+      </elements>
+    </policy>
+    <policy name="DoNotCheckCertRevocationStatus_1" class="User" displayName="$(string.DoNotCheckCertRevocationStatus)" explainText="$(string.DoNotCheckCertRevocationStatusExplain)" presentation="$(presentation.DoNotCheckCertRevocationStatus_1)" key="Software\Policies\Omnissa\Horizon\Client\Security" valueName="IgnoreRevocation">
+      <parentCategory ref="HorizonClientSecurity" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="StrictCertRevocationCheck_1" class="User" displayName="$(string.StrictCertRevocationCheck)" explainText="$(string.StrictCertRevocationCheckExplain)" presentation="$(presentation.StrictCertRevocationCheck_1)" key="Software\Policies\Omnissa\Horizon\Client\Security" valueName="StrictCertRevocationCheck">
+      <parentCategory ref="HorizonClientSecurity" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="EnablePasswordReveal" class="User" displayName="$(string.EnablePasswordReveal)" explainText="$(string.EnablePasswordRevealExplain)" presentation="$(presentation.EnablePasswordReveal)" key="Software\Policies\Omnissa\Horizon\Client\Security" valueName="EnablePasswordReveal">
+      <parentCategory ref="HorizonClientSecurity" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="SSLCipherList_1" class="User" displayName="$(string.SSLCipherList)" explainText="$(string.SSLCipherListExplain)" presentation="$(presentation.SSLCipherList_1)" key="Software\Policies\Omnissa\Horizon\Client\Security">
+      <parentCategory ref="HorizonClientSecurity" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <boolean id="EnableTLSv11TLSv12" valueName="EnableTLSv11TLSv12">
+           <trueValue>
+             <decimal value="1" />
+           </trueValue>
+           <falseValue>
+             <decimal value="0" />
+           </falseValue>
+        </boolean>
+        <text id="SSLCipherList" valueName="SSLCipherList" />
+        <boolean id="EnableTLSv13" valueName="EnableTLSv13">
+           <trueValue>
+             <decimal value="1" />
+           </trueValue>
+           <falseValue>
+             <decimal value="0" />
+           </falseValue>
+        </boolean>
+        <text id="SSLCipherSuites" valueName="SSLCipherSuites" />
+        <text id="SSLSignatureAlgorithms" valueName="SSLSignatureAlgorithms" />
+        <text id="SSLSupportedGroups" valueName="SSLSupportedGroups" />
+      </elements>
+    </policy>
+    <policy name="ServerURL_1" class="User" displayName="$(string.ServerURL)" explainText="$(string.ServerURLExplain)" presentation="$(presentation.ServerURL_1)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClientScripting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <text id="ServerURL" valueName="ServerURL" />
+        <boolean id="LockServerURL" valueName="LockServerURL">
+           <trueValue>
+             <decimal value="1" />
+           </trueValue>
+           <falseValue>
+             <decimal value="0" />
+           </falseValue>
+        </boolean>
+      </elements>
+    </policy>
+    <policy name="UserName_1" class="User" displayName="$(string.UserName)" explainText="$(string.UserNameExplain)" presentation="$(presentation.UserName_1)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClientScripting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <text id="UserName" valueName="UserName" />
+      </elements>
+    </policy>
+    <policy name="DomainName_1" class="User" displayName="$(string.DomainName)" explainText="$(string.DomainNameExplain)" presentation="$(presentation.DomainName_1)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClientScripting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <text id="DomainName" valueName="DomainName" />
+      </elements>
+    </policy>
+    <policy name="Password_1" class="User" displayName="$(string.Password)" explainText="$(string.PasswordExplain)" presentation="$(presentation.Password_1)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClientScripting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <text id="Password" valueName="Password" />
+      </elements>
+    </policy>
+    <policy name="DesktopName_1" class="User" displayName="$(string.DesktopName)" explainText="$(string.DesktopNameExplain)" presentation="$(presentation.DesktopName_1)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClientScripting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <text id="DesktopName" valueName="DesktopName" />
+      </elements>
+    </policy>
+    <policy name="DesktopLayout_1" class="User" displayName="$(string.DesktopLayout)" explainText="$(string.DesktopLayoutExplain)" presentation="$(presentation.DesktopLayout_1)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClientScripting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <enum id="DesktopLayout" valueName="DesktopLayout">
+          <item displayName="$(string.DesktopLayout_FullScreen)">
+            <value>
+              <string>FullScreen</string>
+            </value>
+          </item>
+          <item displayName="$(string.DesktopLayout_WindowLarge)">
+            <value>
+              <string>WindowLarge</string>
+            </value>
+          </item>
+          <item displayName="$(string.DesktopLayout_WindowSmall)">
+            <value>
+              <string>WindowSmall</string>
+            </value>
+          </item>
+          <item displayName="$(string.DesktopLayout_MultiMonitor)">
+            <value>
+              <string>MultiMonitor</string>
+            </value>
+          </item>
+        </enum>
+      </elements>
+    </policy>
+    <policy name="LockedGuestSize_1" class="User" displayName="$(string.LockedGuestSize)" explainText="$(string.LockedGuestSizeExplain)" presentation="$(presentation.LockedGuestSize_1)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClientScripting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <decimal id="LockedGuestWidth" valueName="LockedGuestWidth" required="true" minValue="640" maxValue="4096" />
+        <decimal id="LockedGuestHeight" valueName="LockedGuestHeight" required="true" minValue="480" maxValue="4096" />
+      </elements>
+    </policy>
+    <policy name="NonInteractive_1" class="User" displayName="$(string.NonInteractive)" explainText="$(string.NonInteractiveExplain)" presentation="$(presentation.NonInteractive_1)" key="Software\Policies\Omnissa\Horizon\Client" valueName="NonInteractive">
+      <parentCategory ref="HorizonClientScripting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="SingleAutoConnect_1" class="User" displayName="$(string.SingleAutoConnect)" explainText="$(string.SingleAutoConnectExplain)" presentation="$(presentation.SingleAutoConnect_1)" key="Software\Policies\Omnissa\Horizon\Client" valueName="SingleAutoConnect">
+      <parentCategory ref="HorizonClientScripting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="noTSCAddins_1" class="User" displayName="$(string.noTSCAddins)" explainText="$(string.noTSCAddinsExplain)" presentation="$(presentation.noTSCAddins_1)" key="Software\Policies\Omnissa\Horizon\Client" valueName="noTSCAddins">
+      <parentCategory ref="HorizonClientScripting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="connectUSBOnStartup_1" class="User" displayName="$(string.connectUSBOnStartup)" explainText="$(string.connectUSBOnStartupExplain)" presentation="$(presentation.connectUSBOnStartup_1)" key="Software\Policies\Omnissa\Horizon\Client" valueName="connectUSBOnStartup">
+      <parentCategory ref="HorizonClientScripting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="connectUSBOnInsert_1" class="User" displayName="$(string.connectUSBOnInsert)" explainText="$(string.connectUSBOnInsertExplain)" presentation="$(presentation.connectUSBOnInsert_1)" key="Software\Policies\Omnissa\Horizon\Client" valueName="connectUSBOnInsert">
+      <parentCategory ref="HorizonClientScripting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="AppSessionReconnectBehavior_1" class="User" displayName="$(string.AppSessionReconnectBehavior)" explainText="$(string.AppSessionReconnectBehaviorExplain)" presentation="$(presentation.AppSessionReconnectBehavior_1)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClientScripting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <enum id="AppSessionReconnectBehavior" valueName="AppSessionReconnectBehavior">
+          <item displayName="$(string.AppSessionReconnectBehavior_Ask)">
+            <value>
+              <string>ask</string>
+            </value>
+          </item>
+          <item displayName="$(string.AppSessionReconnectBehavior_Always)">
+            <value>
+              <string>always</string>
+            </value>
+          </item>
+          <item displayName="$(string.AppSessionReconnectBehavior_Never)">
+            <value>
+              <string>never</string>
+            </value>
+          </item>
+        </enum>
+      </elements>
+    </policy>
+    <policy name="AllSessionsDisconnectedBehavior_1" class="User" displayName="$(string.AllSessionsDisconnectedBehavior)" explainText="$(string.AllSessionsDisconnectedBehaviorExplain)" presentation="$(presentation.AllSessionsDisconnectedBehavior_1)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <enum id="AllSessionsDisconnectedBehavior" valueName="AllSessionsDisconnectedBehavior">
+          <item displayName="$(string.AllSessionsDisconnectedBehavior_Quit)">
+            <value>
+              <string>quit</string>
+            </value>
+          </item>
+          <item displayName="$(string.AllSessionsDisconnectedBehavior_Logoff)">
+            <value>
+              <string>logoff</string>
+            </value>
+          </item>
+          <item displayName="$(string.AllSessionsDisconnectedBehavior_Keep)">
+            <value>
+              <string>keep</string>
+            </value>
+          </item>
+        </enum>
+      </elements>
+    </policy>
+    <policy name="UnauthenticatedAccessEnabled_1" class="User" displayName="$(string.UnauthenticatedAccessEnabled)" explainText="$(string.UnauthenticatedAccessEnabledExplain)" presentation="$(presentation.UnauthenticatedAccessEnabled_1)" key="Software\Policies\Omnissa\Horizon\Client" valueName="UnauthenticatedAccessEnabled">
+      <parentCategory ref="HorizonClientScripting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="UnauthenticatedAccessAccount_1" class="User" displayName="$(string.UnauthenticatedAccessAccount)" explainText="$(string.UnauthenticatedAccessAccountExplain)" presentation="$(presentation.UnauthenticatedAccessAccount_1)" key="Software\Policies\Omnissa\Horizon\Client">
+      <parentCategory ref="HorizonClientScripting" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <elements>
+        <text id="UnauthenticatedAccessAccount" valueName="UnauthenticatedAccessAccount" />
+      </elements>
+    </policy>
+    <policy name="AllowBlastDynamicPath_1" class="User" displayName="$(string.AllowBlastDynamicPath)" explainText="$(string.AllowBlastDynamicPathExplain)" presentation="$(presentation.AllowBlastDynamicPath)" key="Software\Policies\Omnissa\Horizon\Client" valueName="AllowBlastDynamicPath">
+      <parentCategory ref="HorizonClient" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="BrowserRedirUseCache" class="Machine" displayName="$(string.BrowserRedirUseCache)" explainText="$(string.BrowserRedirUseCacheExplain)" valueName="useCache" key="Software\Policies\Omnissa\Horizon\BrowserRedir">
+      <parentCategory ref="HorizonBrowserRedirection" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <decimal value="1" />
+      </enabledValue>
+      <disabledValue>
+        <decimal value="0" />
+      </disabledValue>
+    </policy>
+    <policy name="BrowserRedirIgnoreCertErrors" class="Machine" displayName="$(string.BrowserRedirIgnoreCertErrors)" explainText="$(string.BrowserRedirIgnoreCertErrorsExplain)" valueName="ignoreCertErrors" key="Software\Policies\Omnissa\Horizon\BrowserRedir">
+      <parentCategory ref="HorizonBrowserRedirection" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <decimal value="1" />
+      </enabledValue>
+      <disabledValue>
+        <decimal value="0" />
+      </disabledValue>
+    </policy>
+    <policy name="BrowserRedirEnableMediaStream" class="Machine" displayName="$(string.BrowserRedirEnableMediaStream)" explainText="$(string.BrowserRedirEnableMediaStreamExplain)" valueName="enableMediaStream" key="Software\Policies\Omnissa\Horizon\BrowserRedir">
+      <parentCategory ref="HorizonBrowserRedirection" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <decimal value="1" />
+      </enabledValue>
+      <disabledValue>
+        <decimal value="0" />
+      </disabledValue>
+    </policy>
+    <policy name="TlmSSIDEnabled" class="Machine" displayName="$(string.TlmSSID_Enabled)" explainText="$(string.TlmSSIDEnabled_Explain)" presentation="$(presentation.TlmSSID_Enabled)" key="Software\Omnissa\Horizon\TlmRdpVCBridge" valueName="TlmSSIDEnabled">
+      <parentCategory ref="HorizonTelemetry" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="TlmPublicIPDataEnabled" class="Machine" displayName="$(string.TlmPublicIPData_Enabled)" explainText="$(string.TlmPublicIPDataEnabled_Explain)" presentation="$(presentation.TlmPublicIPData_Enabled)" key="Software\Omnissa\Horizon\TlmRdpVCBridge" valueName="TlmPublicIPDataEnabled">
+      <parentCategory ref="HorizonTelemetry" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+      <enabledValue>
+        <string>true</string>
+      </enabledValue>
+      <disabledValue>
+        <string>false</string>
+      </disabledValue>
+    </policy>
+    <policy name="SISActive" class="Both" displayName="$(string.PrintRedir_SISActive)" explainText="$(string.PrintRedir_SISActive_detail)" key="Software\Policies\Omnissa\Horizon\PrintRedir" valueName="SISActive">
+      <parentCategory ref="HorizonPrintRedirection" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+    </policy>
+    <policy name="LPSetting" class="Both" displayName="$(string.PrintRedir_lp_setting)" explainText="$(string.PrintRedir_lp_setting_detail)" key="Software\Policies\Omnissa\Horizon\PrintRedir" valueName="DisableClientPrinterRedir">
+      <parentCategory ref="HorizonPrintRedirection" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+    </policy>
+    <policy name="MaxTxRate" class="Both" displayName="$(string.PrintRedir_MaxTxRate)" explainText="$(string.PrintRedir_MaxTxRate_detail)" key="Software\Policies\Omnissa\Horizon\PrintRedir" presentation="$(presentation.MaxTxRate)" valueName="MaxTxRate">
+      <parentCategory ref="HorizonPrintRedirection" />
+      <supportedOn ref="SUPPORTED_NotSpecified" />
+        <elements>
+         <decimal id="MaxTxRate" key="Software\Policies\Omnissa\Horizon\PrintRedir" valueName="MaxTxRate" required="true" maxValue="4000" minValue="200" />
+        </elements>
+    </policy>
+    <policy name="ShowBluetoothIcon" class="Machine" displayName="$(string.ShowBluetoothIcon)" explainText="$(string.ShowBluetoothIconExplain)" presentation="$(presentation.ShowBluetoothIcon)" key="Software\Policies\Omnissa\Horizon\Client" valueName="ShowBluetoothIcon">
+       <parentCategory ref="HorizonClient" />
+       <supportedOn ref="SUPPORTED_NotSpecified" />
+       <enabledValue>
+          <string>true</string>
+       </enabledValue>
+       <disabledValue>
+          <string>false</string>
+       </disabledValue>
+    </policy>
+    <policy name="PreferredSpeaker" class="User" displayName="$(string.PreferredSpeaker)" explainText="$(string.PreferredSpeakerExplain)" presentation="$(presentation.PreferredSpeaker)" key="Software\Omnissa\Horizon\Client">
+       <parentCategory ref="HorizonClient" />
+       <supportedOn ref="SUPPORTED_NotSpecified" />
+       <elements>
+        <enum id="PreferredSpeaker" valueName="SelectedAudioOutOptions">
+          <item displayName="$(string.PreferredSpeaker_Default)">
+            <value>
+              <decimal value="0" />
+            </value>
+          </item>
+          <item displayName="$(string.PreferredSpeaker_All)">
+            <value>
+              <decimal value="1" />
+            </value>
+          </item>
+        </enum>
+      </elements>
+    </policy>
+    <policy name="NetworkStatsCheckEnabled" class="Machine" displayName="$(string.NetworkStatsCheckEnabled)" explainText="$(string.NetworkStatsCheckEnabledExplain)" key="Software\Policies\Omnissa\Horizon\Client\vvc" valueName="NetworkStatsCheckEnabled">
+       <parentCategory ref="HorizonClientNetworkQuality" />
+       <supportedOn ref="SUPPORTED_NotSpecified" />
+       <enabledValue>
+          <string>1</string>
+       </enabledValue>
+       <disabledValue>
+          <string>0</string>
+       </disabledValue>
+    </policy>
+     <policy name="NetworkStatsCheckPeriodSec" class="Machine" displayName="$(string.NetworkStatsCheckPeriodSec)" explainText="$(string.NetworkStatsCheckPeriodSecExplain)" key="Software\Policies\Omnissa\Horizon\Client\vvc" presentation="$(presentation.NetworkStatsCheckPeriodSec)" >
+        <parentCategory ref="HorizonClientNetworkQuality" />
+        <supportedOn ref="SUPPORTED_NotSpecified" />
+        <elements>
+           <decimal id="NetworkStatsCheckPeriodSec" valueName="NetworkStatsCheckPeriodSec" required="true" minValue="3" storeAsText="true" />
+        </elements>
+     </policy>
+     <policy name="NetworkStatsQualityScoreTcpThresholdGood" class="Machine" displayName="$(string.NetworkStatsQualityScoreTcpThresholdGood)" explainText="$(string.NetworkStatsQualityScoreTcpThresholdGoodExplain)" key="Software\Policies\Omnissa\Horizon\Client\vvc" presentation="$(presentation.NetworkStatsQualityScoreTcpThresholdGood)" >
+        <parentCategory ref="HorizonClientNetworkQuality" />
+        <supportedOn ref="SUPPORTED_NotSpecified" />
+        <elements>
+           <decimal id="NetworkStatsQualityScoreTcpThresholdGood" valueName="NetworkStatsQualityScoreTcpThresholdGood" required="true" maxValue="100" minValue="0" storeAsText="true" />
+        </elements>
+     </policy>
+     <policy name="NetworkStatsQualityScoreTcpThresholdPoor" class="Machine" displayName="$(string.NetworkStatsQualityScoreTcpThresholdPoor)" explainText="$(string.NetworkStatsQualityScoreTcpThresholdPoorExplain)" key="Software\Policies\Omnissa\Horizon\Client\vvc" presentation="$(presentation.NetworkStatsQualityScoreTcpThresholdPoor)" >
+        <parentCategory ref="HorizonClientNetworkQuality" />
+        <supportedOn ref="SUPPORTED_NotSpecified" />
+        <elements>
+           <decimal id="NetworkStatsQualityScoreTcpThresholdPoor" valueName="NetworkStatsQualityScoreTcpThresholdPoor" required="true" maxValue="100" minValue="0" storeAsText="true" />
+        </elements>
+     </policy>
+     <policy name="NetworkStatsQualityScoreBeatThresholdGood" class="Machine" displayName="$(string.NetworkStatsQualityScoreBeatThresholdGood)" explainText="$(string.NetworkStatsQualityScoreBeatThresholdGoodExplain)" key="Software\Policies\Omnissa\Horizon\Client\vvc" presentation="$(presentation.NetworkStatsQualityScoreBeatThresholdGood)" >
+        <parentCategory ref="HorizonClientNetworkQuality" />
+        <supportedOn ref="SUPPORTED_NotSpecified" />
+        <elements>
+           <decimal id="NetworkStatsQualityScoreBeatThresholdGood" valueName="NetworkStatsQualityScoreBeatThresholdGood" required="true" maxValue="100" minValue="0" storeAsText="true" />
+        </elements>
+     </policy>
+     <policy name="NetworkStatsQualityScoreBeatThresholdPoor" class="Machine" displayName="$(string.NetworkStatsQualityScoreBeatThresholdPoor)" explainText="$(string.NetworkStatsQualityScoreBeatThresholdPoorExplain)" key="Software\Policies\Omnissa\Horizon\Client\vvc" presentation="$(presentation.NetworkStatsQualityScoreBeatThresholdPoor)" >
+        <parentCategory ref="HorizonClientNetworkQuality" />
+        <supportedOn ref="SUPPORTED_NotSpecified" />
+        <elements>
+           <decimal id="NetworkStatsQualityScoreBeatThresholdPoor" valueName="NetworkStatsQualityScoreBeatThresholdPoor" required="true" maxValue="100" minValue="0" storeAsText="true" />
+        </elements>
+     </policy>
+     <policy name="NetworkStatsTcpRttMSLow" class="Machine" displayName="$(string.NetworkStatsTcpRttMSLow)" explainText="$(string.NetworkStatsTcpRttMSLowExplain)" key="Software\Policies\Omnissa\Horizon\Client\vvc" presentation="$(presentation.NetworkStatsTcpRttMSLow)" >
+        <parentCategory ref="HorizonClientNetworkQuality" />
+        <supportedOn ref="SUPPORTED_NotSpecified" />
+        <elements>
+           <decimal id="NetworkStatsTcpRttMSLow" valueName="NetworkStatsTcpRttMSLow" required="true" minValue="1" storeAsText="true" />
+        </elements>
+     </policy>
+     <policy name="NetworkStatsTcpRttMSHigh" class="Machine" displayName="$(string.NetworkStatsTcpRttMSHigh)" explainText="$(string.NetworkStatsTcpRttMSHighExplain)" key="Software\Policies\Omnissa\Horizon\Client\vvc" presentation="$(presentation.NetworkStatsTcpRttMSHigh)" >
+        <parentCategory ref="HorizonClientNetworkQuality" />
+        <supportedOn ref="SUPPORTED_NotSpecified" />
+        <elements>
+           <decimal id="NetworkStatsTcpRttMSHigh" valueName="NetworkStatsTcpRttMSHigh" required="true" minValue="1" storeAsText="true" />
+        </elements>
+     </policy>
+     <policy name="NetworkStatsTcpRttMSWeightPercent" class="Machine" displayName="$(string.NetworkStatsTcpRttMSWeightPercent)" explainText="$(string.NetworkStatsTcpRttMSWeightPercentExplain)" key="Software\Policies\Omnissa\Horizon\Client\vvc" presentation="$(presentation.NetworkStatsTcpRttMSWeightPercent)" >
+        <parentCategory ref="HorizonClientNetworkQuality" />
+        <supportedOn ref="SUPPORTED_NotSpecified" />
+        <elements>
+           <text id="NetworkStatsTcpRttMSWeightPercent" valueName="NetworkStatsTcpRttMSWeightPercent" required="true" />
+        </elements>
+     </policy>
+     <policy name="NetworkStatsBeatRttMSLow" class="Machine" displayName="$(string.NetworkStatsBeatRttMSLow)" explainText="$(string.NetworkStatsBeatRttMSLowExplain)" key="Software\Policies\Omnissa\Horizon\Client\vvc" presentation="$(presentation.NetworkStatsBeatRttMSLow)" >
+        <parentCategory ref="HorizonClientNetworkQuality" />
+        <supportedOn ref="SUPPORTED_NotSpecified" />
+        <elements>
+           <decimal id="NetworkStatsBeatRttMSLow" valueName="NetworkStatsBeatRttMSLow" required="true" minValue="1" storeAsText="true" />
+        </elements>
+     </policy>
+     <policy name="NetworkStatsBeatRttMSHigh" class="Machine" displayName="$(string.NetworkStatsBeatRttMSHigh)" explainText="$(string.NetworkStatsBeatRttMSHighExplain)" key="Software\Policies\Omnissa\Horizon\Client\vvc" presentation="$(presentation.NetworkStatsBeatRttMSHigh)" >
+        <parentCategory ref="HorizonClientNetworkQuality" />
+        <supportedOn ref="SUPPORTED_NotSpecified" />
+        <elements>
+           <decimal id="NetworkStatsBeatRttMSHigh" valueName="NetworkStatsBeatRttMSHigh" required="true" minValue="1" storeAsText="true" />
+        </elements>
+     </policy>
+     <policy name="NetworkStatsBeatRttMSExtreme" class="Machine" displayName="$(string.NetworkStatsBeatRttMSExtreme)" explainText="$(string.NetworkStatsBeatRttMSExtremeExplain)" key="Software\Policies\Omnissa\Horizon\Client\vvc" presentation="$(presentation.NetworkStatsBeatRttMSExtreme)" >
+        <parentCategory ref="HorizonClientNetworkQuality" />
+        <supportedOn ref="SUPPORTED_NotSpecified" />
+        <elements>
+           <decimal id="NetworkStatsBeatRttMSExtreme" valueName="NetworkStatsBeatRttMSExtreme" required="true" minValue="1" storeAsText="true" />
+        </elements>
+     </policy>
+     <policy name="NetworkStatsBeatRttMSWeightPercent" class="Machine" displayName="$(string.NetworkStatsBeatRttMSWeightPercent)" explainText="$(string.NetworkStatsBeatRttMSWeightPercentExplain)" key="Software\Policies\Omnissa\Horizon\Client\vvc" presentation="$(presentation.NetworkStatsBeatRttMSWeightPercent)" >
+        <parentCategory ref="HorizonClientNetworkQuality" />
+        <supportedOn ref="SUPPORTED_NotSpecified" />
+        <elements>
+           <decimal id="NetworkStatsBeatRttMSWeightPercent" valueName="NetworkStatsBeatRttMSWeightPercent" required="true" maxValue="100" minValue="0" storeAsText="true" />
+        </elements>
+     </policy>
+     <policy name="NetworkStatsBeatPkLossPercentLow" class="Machine" displayName="$(string.NetworkStatsBeatPkLossPercentLow)" explainText="$(string.NetworkStatsBeatPkLossPercentLowExplain)" key="Software\Policies\Omnissa\Horizon\Client\vvc" presentation="$(presentation.NetworkStatsBeatPkLossPercentLow)" >
+        <parentCategory ref="HorizonClientNetworkQuality" />
+        <supportedOn ref="SUPPORTED_NotSpecified" />
+        <elements>
+           <text id="NetworkStatsBeatPkLossPercentLow" valueName="NetworkStatsBeatPkLossPercentLow" required="true" />
+        </elements>
+     </policy>
+     <policy name="NetworkStatsBeatPkLossPercentHigh" class="Machine" displayName="$(string.NetworkStatsBeatPkLossPercentHigh)" explainText="$(string.NetworkStatsBeatPkLossPercentHighExplain)" key="Software\Policies\Omnissa\Horizon\Client\vvc" presentation="$(presentation.NetworkStatsBeatPkLossPercentHigh)" >
+        <parentCategory ref="HorizonClientNetworkQuality" />
+        <supportedOn ref="SUPPORTED_NotSpecified" />
+        <elements>
+           <decimal id="NetworkStatsBeatPkLossPercentHigh" valueName="NetworkStatsBeatPkLossPercentHigh" required="true" maxValue="100" minValue="0" storeAsText="true" />
+        </elements>
+     </policy>
+     <policy name="NetworkStatsBeatPkLossPercentExtreme" class="Machine" displayName="$(string.NetworkStatsBeatPkLossPercentExtreme)" explainText="$(string.NetworkStatsBeatPkLossPercentExtremeExplain)" key="Software\Policies\Omnissa\Horizon\Client\vvc" presentation="$(presentation.NetworkStatsBeatPkLossPercentExtreme)" >
+        <parentCategory ref="HorizonClientNetworkQuality" />
+        <supportedOn ref="SUPPORTED_NotSpecified" />
+        <elements>
+           <decimal id="NetworkStatsBeatPkLossPercentExtreme" valueName="NetworkStatsBeatPkLossPercentExtreme" required="true" maxValue="100" minValue="0" storeAsText="true" />
+        </elements>
+     </policy>
+     <policy name="NetworkStatsBeatPkLossPercentWeightPercent" class="Machine" displayName="$(string.NetworkStatsBeatPkLossPercentWeightPercent)" explainText="$(string.NetworkStatsBeatPkLossPercentWeightPercentExplain)" key="Software\Policies\Omnissa\Horizon\Client\vvc" presentation="$(presentation.NetworkStatsBeatPkLossPercentWeightPercent)" >
+        <parentCategory ref="HorizonClientNetworkQuality" />
+        <supportedOn ref="SUPPORTED_NotSpecified" />
+        <elements>
+           <decimal id="NetworkStatsBeatPkLossPercentWeightPercent" valueName="NetworkStatsBeatPkLossPercentWeightPercent" required="true" maxValue="100" minValue="0" storeAsText="true" />
+        </elements>
+     </policy>
+     <policy name="NetworkStatsBeatRttvMSLow" class="Machine" displayName="$(string.NetworkStatsBeatRttvMSLow)" explainText="$(string.NetworkStatsBeatRttvMSLowExplain)" key="Software\Policies\Omnissa\Horizon\Client\vvc" presentation="$(presentation.NetworkStatsBeatRttvMSLow)" >
+        <parentCategory ref="HorizonClientNetworkQuality" />
+        <supportedOn ref="SUPPORTED_NotSpecified" />
+        <elements>
+           <decimal id="NetworkStatsBeatRttvMSLow" valueName="NetworkStatsBeatRttvMSLow" required="true" minValue="1" storeAsText="true" />
+        </elements>
+     </policy>
+     <policy name="NetworkStatsBeatRttvMSHigh" class="Machine" displayName="$(string.NetworkStatsBeatRttvMSHigh)" explainText="$(string.NetworkStatsBeatRttvMSHighExplain)" key="Software\Policies\Omnissa\Horizon\Client\vvc" presentation="$(presentation.NetworkStatsBeatRttvMSHigh)" >
+        <parentCategory ref="HorizonClientNetworkQuality" />
+        <supportedOn ref="SUPPORTED_NotSpecified" />
+        <elements>
+           <decimal id="NetworkStatsBeatRttvMSHigh" valueName="NetworkStatsBeatRttvMSHigh" required="true" minValue="1" storeAsText="true" />
+        </elements>
+     </policy>
+     <policy name="NetworkStatsBeatRttvMSWeightPercent" class="Machine" displayName="$(string.NetworkStatsBeatRttvMSWeightPercent)" explainText="$(string.NetworkStatsBeatRttvMSWeightPercentExplain)" key="Software\Policies\Omnissa\Horizon\Client\vvc" presentation="$(presentation.NetworkStatsBeatRttvMSWeightPercent)" >
+        <parentCategory ref="HorizonClientNetworkQuality" />
+        <supportedOn ref="SUPPORTED_NotSpecified" />
+        <elements>
+           <decimal id="NetworkStatsBeatRttvMSWeightPercent" valueName="NetworkStatsBeatRttvMSWeightPercent" required="true" maxValue="100" minValue="0" storeAsText="true" />
+        </elements>
+     </policy>
+  </policies>
+</policyDefinitions>
